@@ -3,13 +3,10 @@
 
 #include "primatives.h"
 
-typedef struct string {
-	inherit_primative(struct primative);
+declare_primative_begin(string, StringPrimative, primative)
 	char *string;
 	size_t length;
-} string;
-
-extern primative_class StringPrimative;
+declare_primative_end(string)
 
 char string_charAt(string *str, unsigned int index);
 

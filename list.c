@@ -2,11 +2,9 @@
 
 void node_destroy(node *);
 
-primative_class NodePrimative = {
-	.size            = sizeof(struct node),
-	.destroy         = (destroy_fn)&node_destroy,
-	.super_primative = &PrimativeClass
-};
+define_primative_class_begin(node, NodePrimative, PrimativeClass)
+	primative_class_using_destroy(node_destroy) 
+define_primative_class_end(node)
 
 void node_destroy(node *n) {
 	disown(n->value);
@@ -36,12 +34,10 @@ primative *node_value(node *n) {
 list *list_initialize(list *, va_list *args);
 void list_destroy(list *);
 
-primative_class ListPrimative = {
-	.size            = sizeof(struct list),
-	.initialize      = (init_fn)&list_initialize,
-	.destroy         = (destroy_fn)&list_destroy,
-	.super_primative = &NodePrimative
-};
+define_primative_class_begin(list, ListPr, NodePrimative)
+	primative_class_using_initialize(list_initialize)
+	primative_class_using_destroy(list_destroy) 
+define_primative_class_end(list)
 
 list *list_initialize(list *l, va_list *args) {
 	node_initialize((node *)l, NULL, (primative *)&PrimativeNull, NULL);

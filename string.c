@@ -6,13 +6,11 @@ string *string_initialize(string *, va_list *args);
 void string_destroy(string *);
 string *string_copy(string *);
 
-primative_class StringPrimative = {
-	.size            = sizeof(struct string),
-	.initialize      = (init_fn)&string_initialize,
-	.destroy         = (destroy_fn)&string_destroy,
-	.copy            = (copy_fn)*string_copy,
-	.super_primative = &PrimativeClass
-};
+define_primative_class_begin(string, StringPrimative, PrimativeClass)
+	primative_class_using_initialize(string_initialize)
+	primative_class_using_destroy(string_destroy)
+	primative_class_using_copy(string_copy) 
+define_primative_class_end(string)
 
 string *string_initialize(string *str, va_list *args) {
 	char *c_string = va_arg(*args, char *);

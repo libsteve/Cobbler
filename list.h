@@ -3,23 +3,17 @@
 
 #include "primatives.h"
 
-typedef struct node {
-	inherit_primative(struct primative);
+declare_primative_begin(node, NodePrimative, PrimativeClass)
 	struct node *next;
 	struct node *prev;
 	struct primative *value;
-} node;
-
-extern primative_class NodePrimative;
+declare_primative_end(node)
 
 extern node *node_initialize(node *, node *prev, primative *value, node *next);
 
-typedef struct list {
-	inherit_primative(node);
+declare_primative_begin(list, ListPrimative, node)
 	size_t length;
-} list;
-
-extern primative_class ListPrimative;
+declare_primative_end(list)
 
 extern primative *list_head(list *l);
 extern primative *list_tail(list *l);

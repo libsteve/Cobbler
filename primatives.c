@@ -76,12 +76,10 @@ void autodisown_pool_destroy(autodisown_pool *pool) {
 	pool->primative.destroy((primative *)pool);
 }
 
-primative_class autodisown_poolPrimative = {
-	.size            = sizeof(struct autodisown_pool),
-	.initialize      = (init_fn)&autodisown_pool_initialize,
-	.destroy         = (destroy_fn)&autodisown_pool_destroy,
-	.super_primative = &PrimativeClass
-};
+define_primative_class_begin(autodisown_pool, autodisown_poolPrimative, PrimativeClass)
+	primative_class_using_initialize(autodisown_pool_initialize)
+	primative_class_using_destroy(autodisown_pool_destroy)
+define_primative_class_end(autodisown_pool)
 
 void *own(void *v) {
 	primative *p = v;
