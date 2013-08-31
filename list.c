@@ -2,9 +2,9 @@
 
 void node_destroy(node *);
 
-define_primative_class_begin(node, primative)
-	primative_class_using_destroy(node_destroy) 
-define_primative_class_end(node)
+define_primitive_class_begin(node, primitive)
+	primitive_class_using_destroy(node_destroy) 
+define_primitive_class_end(node)
 
 void node_destroy(node *n) {
 	disown(n->value);
@@ -13,7 +13,7 @@ void node_destroy(node *n) {
 	SuperDestroy(n);
 }
 
-node *node_initialize(node *n, node *prev, primative* value, node *next) {
+node *node_initialize(node *n, node *prev, primitive* value, node *next) {
 	if (n) {
 		n->prev = prev;
 		n->value = own(value);
@@ -24,7 +24,7 @@ node *node_initialize(node *n, node *prev, primative* value, node *next) {
 	return n;
 }
 
-primative *node_value(node *n) {
+primitive *node_value(node *n) {
 	if (n) {
 		return n->value;
 	}
@@ -34,16 +34,16 @@ primative *node_value(node *n) {
 list *list_initialize(list *);
 void list_destroy(list *);
 
-define_primative_class_begin(list, node)
-	primative_class_using_initialize(list_initialize)
-	primative_class_using_destroy(list_destroy) 
-define_primative_class_end(list)
+define_primitive_class_begin(list, node)
+	primitive_class_using_initialize(list_initialize)
+	primitive_class_using_destroy(list_destroy) 
+define_primitive_class_end(list)
 
-// define_primative_begin(list_null, primative)
-// define_primative_end(list_null)
-// define_primative_class_begin(list_null, primative)
+// define_primitive_begin(list_null, primitive)
+// define_primitive_end(list_null)
+// define_primitive_class_begin(list_null, primitive)
 // 	, .ownership_count = 9999
-// define_primative_class_end(list_null)
+// define_primitive_class_end(list_null)
 
 list *list_initialize(list *l) {
 	node_initialize((node *)l, NULL, NULL, NULL);
@@ -60,48 +60,48 @@ void list_destroy(list *l) {
 	SuperDestroy(l);
 }
 
-primative *list_head(list *l) {
-	primative *p = ((node *)l)->next->value;
+primitive *list_head(list *l) {
+	primitive *p = ((node *)l)->next->value;
 	return autodisown(own(p));
 }
 
-primative *list_tail(list *l) {
-	primative *p = ((node *)l)->prev->value;
+primitive *list_tail(list *l) {
+	primitive *p = ((node *)l)->prev->value;
 	return autodisown(own(p));
 }
 
-list *list_push(list *l, primative *p) {
+list *list_push(list *l, primitive *p) {
 	node *n = make(node);
 	n = node_initialize(n, ((node *)l)->prev, p, (node *)l);
 	if (n) l->length += 1;
 	return l;
 }
 
-list *list_rpush(list *l, primative *p) {
+list *list_rpush(list *l, primitive *p) {
 	node *n = make(node);
 	n = node_initialize(n, (node *)l, p, ((node *)l)->next);
 	if (n) l->length += 1;
 	return l;
 }
 
-primative *list_peek(list *l) {
+primitive *list_peek(list *l) {
 	if (l->length > 0) {
-		primative *p = ((node *)l)->prev->value;
+		primitive *p = ((node *)l)->prev->value;
 		return autodisown(own(p));
 	}
 	return NULL;
 }
 
-primative *list_rpeek(list *l) {
+primitive *list_rpeek(list *l) {
 	if (l->length > 0) {
-		primative *p = ((node *)l)->next->value;
+		primitive *p = ((node *)l)->next->value;
 		return autodisown(own(p));
 	}
 	return NULL;
 }
 
-list *list_pop(list *l, primative *output p) {
-	primative *value = NULL;
+list *list_pop(list *l, primitive *output p) {
+	primitive *value = NULL;
 	if (l->length > 0) {
 		node *prev = ((node *)l)->prev;
 		value = own(prev->value);
@@ -117,8 +117,8 @@ list *list_pop(list *l, primative *output p) {
 	return l;
 }
 
-list *list_rpop(list *l, primative *output p) {
-	primative *value = NULL;
+list *list_rpop(list *l, primitive *output p) {
+	primitive *value = NULL;
 	if (l->length > 0) {
 		node *next = ((node *)l)->next;
 		value = own(next->value);

@@ -1,14 +1,14 @@
 #ifndef VALUE_H
 #define VALUE_H
 
-#include "primatives.h"
+#include "primitive.h"
 #include "string.h"
 
-define_primative_begin(value, primative)
+define_primitive_begin(value, primitive)
 	void *bytes;
 	size_t size;
 	string *type;
-define_primative_end(value)
+define_primitive_end(value)
 
 value *value_initialize(value *v, void *bytes, size_t size);
 value *value_initializeWithType(value *v, void *bytes, size_t size, string *type);

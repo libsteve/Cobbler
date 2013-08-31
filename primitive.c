@@ -1,4 +1,4 @@
-#include "primatives.h"
+#include "primitive.h"
 #include <stdio.h>
 
 // this is to compensate for clang's lack of C11's <threads.h> header :/
@@ -10,25 +10,25 @@
 #define tss_t pthread_key_t
 
 /////////////////////////////////////////
-// Primative Definitions
+// primitive Definitions
 
-primative *_default_initialize(primative *p) {
+primitive *_default_initialize(primitive *p) {
 	return p;
 }
 
-primative *_default_copy(primative *p) {
+primitive *_default_copy(primitive *p) {
 	return NULL;
 }
 
-void _default_destroy(primative *p) {
+void _default_destroy(primitive *p) {
 	return;
 }
 
-define_primative_class_begin(primative, primative)
-	primative_class_using_initialize(_default_initialize)
-	primative_class_using_copy(_default_copy)
-	primative_class_using_destroy(_default_destroy)   
-define_primative_class_end(primative)
+define_primitive_class_begin(primitive, primitive)
+	primitive_class_using_initialize(_default_initialize)
+	primitive_class_using_copy(_default_copy)
+	primitive_class_using_destroy(_default_destroy)   
+define_primitive_class_end(primitive)
 
 /////////////////////////////////////////
 // Autodisown Definitions
@@ -78,7 +78,7 @@ void autodisown_pool_destroy(autodisown_pool *pool) {
 	if (pool) {
 		if (pool->autodisowned_objects) {
 			uint32_t count = 0;
-			for (primative *p = pool->autodisowned_objects[count]; 
+			for (primitive *p = pool->autodisowned_objects[count]; 
 				 p != NULL; 
 				 p = pool->autodisowned_objects[++count]) {
 				disown(p);
@@ -87,30 +87,30 @@ void autodisown_pool_destroy(autodisown_pool *pool) {
 		__set_autodisown_pool(pool->previous_pool);
 		disown(pool->previous_pool);
 	}
-	pool->primative.destroy((primative *)pool);
+	pool->primitive.destroy((primitive *)pool);
 }
 
-define_primative_class_begin(autodisown_pool, primative)
-	primative_class_using_initialize(autodisown_pool_initialize)
-	primative_class_using_destroy(autodisown_pool_destroy)
-define_primative_class_end(autodisown_pool)
+define_primitive_class_begin(autodisown_pool, primitive)
+	primitive_class_using_initialize(autodisown_pool_initialize)
+	primitive_class_using_destroy(autodisown_pool_destroy)
+define_primitive_class_end(autodisown_pool)
 
 void *own(void *v) {
-	primative *p = v;
+	primitive *p = v;
 	if (p != NULL) {
-		p->primative.ownership_count += 1;
+		p->primitive.ownership_count += 1;
 	}
 	return p;
 }
 
 void *disown(void *v) {
-	primative *p = v;
+	primitive *p = v;
 	if (p != NULL) {
-		if (PrimativeClass(p).ownership_count == 0) {
+		if (PrimitiveClass(p).ownership_count == 0) {
 			return p;
 		}
-		PrimativeClass(p).ownership_count -= 1;
-		if (PrimativeClass(p).ownership_count == 0) {
+		PrimitiveClass(p).ownership_count -= 1;
+		if (PrimitiveClass(p).ownership_count == 0) {
 			destroy(p);
 		}
 	}
@@ -118,16 +118,16 @@ void *disown(void *v) {
 }
 
 void *autodisown(void *v) {
-	primative *p = v;
+	primitive *p = v;
 	autodisown_pool *pool = __autodisown_pool();
 	if (pool) {
 		int count = 0;
 		for (int i=0; pool->autodisowned_objects[i] != NULL; i++, count++) {
-			primative *autodisowned = pool->autodisowned_objects[i];
+			primitive *autodisowned = pool->autodisowned_objects[i];
 			if (autodisowned == p)
 				return p;
 		}
-		pool->autodisowned_objects = realloc(pool->autodisowned_objects, (count + 2) * sizeof(primative *));
+		pool->autodisowned_objects = realloc(pool->autodisowned_objects, (count + 2) * sizeof(primitive *));
 		pool->autodisowned_objects[count] = p;
 		pool->autodisowned_objects[count+1] = NULL;
 	}
@@ -137,55 +137,55 @@ void *autodisown(void *v) {
 /////////////////////////////////////////
 // Creation Definitions
 
-primative *__make_instance(primative_class c) {
-	primative *p = calloc(1, c.size);
-	p->primative = c;
+primitive *__make_instance(primitive_class c) {
+	primitive *p = calloc(1, c.size);
+	p->primitive = c;
 	return own(p);
 }
 
-primative *__make_initialize_none(primative *p, ...) {
+primitive *__make_initialize_none(primitive *p, ...) {
 	return p;
 }
 
-primative *(*__make_initialize_fn(primative_class c))(primative *, ...) {
+primitive *(*__make_initialize_fn(primitive_class c))(primitive *, ...) {
 	if (c.initialize != NULL) {
 		return c.initialize;
-	} else if (c.super_primative != NULL) {
-		return __make_initialize_fn(*(c.super_primative));
+	} else if (c.super_primitive != NULL) {
+		return __make_initialize_fn(*(c.super_primitive));
 	}
 	return __make_initialize_none;
 }
 
-void *__copy(primative *p, primative_class c) {
+void *__copy(primitive *p, primitive_class c) {
 	if (c.copy != NULL) {
 		return c.copy(p);
-	} else if (c.super_primative != NULL) {
-		return __copy(p, *(c.super_primative));
+	} else if (c.super_primitive != NULL) {
+		return __copy(p, *(c.super_primitive));
 	}
 	return NULL;
 }
 
 void *copy(void *v) {
-	primative *p = v;
-	primative *copy = NULL;
+	primitive *p = v;
+	primitive *copy = NULL;
 	if (p != NULL) {
-		copy = __copy(p, PrimativeClass(p));
+		copy = __copy(p, PrimitiveClass(p));
 	}
 	return copy;
 }
 
-void __destroy(primative *p, primative_class c) {
+void __destroy(primitive *p, primitive_class c) {
 	if (c.destroy != NULL) {
 		c.destroy(p);
-	} else if (c.super_primative != NULL) {
-		__destroy(p, *(c.super_primative));
+	} else if (c.super_primitive != NULL) {
+		__destroy(p, *(c.super_primitive));
 	}
 }
 
 void destroy(void *v) {
-	primative *p = v;
+	primitive *p = v;
 	if (p != NULL) {
-		__destroy(p, PrimativeClass(p));
+		__destroy(p, PrimitiveClass(p));
 	}
 	free(p);
 }

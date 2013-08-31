@@ -1,12 +1,12 @@
 #ifndef string_H
 #define string_H
 
-#include "primatives.h"
+#include "primitive.h"
 
-define_primative_begin(string, primative)
+define_primitive_begin(string, primitive)
 	char *string;
 	size_t length;
-define_primative_end(string)
+define_primitive_end(string)
 
 char string_charAt(string *str, unsigned int index);
 

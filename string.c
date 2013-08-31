@@ -6,11 +6,11 @@ string *string_initialize(string *, char *);
 void string_destroy(string *);
 string *string_copy(string *);
 
-define_primative_class_begin(string, primative)
-	primative_class_using_initialize(string_initialize)
-	primative_class_using_destroy(string_destroy)
-	primative_class_using_copy(string_copy) 
-define_primative_class_end(string)
+define_primitive_class_begin(string, primitive)
+	primitive_class_using_initialize(string_initialize)
+	primitive_class_using_destroy(string_destroy)
+	primitive_class_using_copy(string_copy) 
+define_primitive_class_end(string)
 
 string *string_initialize(string *str, char *c_string) {
 	str->length = strlen(c_string);
