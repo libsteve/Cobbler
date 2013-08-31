@@ -1,6 +1,5 @@
 #include "primatives.h"
 #include <stdio.h>
-#include <stdbool.h>
 
 // this is to compensate for clang's lack of C11's <threads.h> header :/
 #include <pthread.h>
@@ -10,14 +9,29 @@
 #define thrd_success 0
 #define tss_t pthread_key_t
 
-primative_class PrimativeClass = {
-	.size            = sizeof(struct primative),
-	.initialize      = NULL,
-	.destroy         = NULL,
-	.copy            = NULL,
-	.ownership_count = 0,
-	.super_primative = NULL
-};
+/////////////////////////////////////////
+// Primative Definitions
+
+primative *_default_initialize(primative *p) {
+	return p;
+}
+
+primative *_default_copy(primative *p) {
+	return NULL;
+}
+
+void _default_destroy(primative *p) {
+	return;
+}
+
+define_primative_class_begin(primative, primative)
+	primative_class_using_initialize(_default_initialize)
+	primative_class_using_copy(_default_copy)
+	primative_class_using_destroy(_default_destroy)   
+define_primative_class_end(primative)
+
+/////////////////////////////////////////
+// Autodisown Definitions
 
 static tss_t autodisown_pool_tss_id;
 
@@ -76,7 +90,7 @@ void autodisown_pool_destroy(autodisown_pool *pool) {
 	pool->primative.destroy((primative *)pool);
 }
 
-define_primative_class_begin(autodisown_pool, autodisown_poolPrimative, PrimativeClass)
+define_primative_class_begin(autodisown_pool, primative)
 	primative_class_using_initialize(autodisown_pool_initialize)
 	primative_class_using_destroy(autodisown_pool_destroy)
 define_primative_class_end(autodisown_pool)
@@ -120,28 +134,27 @@ void *autodisown(void *v) {
 	return p;
 }
 
-primative *make_init(primative *p, primative_class c, va_list *args) {
-	if (c.initialize != NULL) {
-		return c.initialize(p, args);
-	} else if (c.super_primative != NULL) {
-		return make_init(p, *(c.super_primative), args);
-	}
-	return NULL;
+/////////////////////////////////////////
+// Creation Definitions
+
+primative *__make_instance(primative_class c) {
+	primative *p = calloc(1, c.size);
+	p->primative = c;
+	return own(p);
 }
 
-void *make(primative_class c, ...) {
-	va_list args;
-	va_start(args, c);
-
-	primative *p = calloc(1, c.size);
-	p = make_init(p, c, &args);
-
-	own(p);
-	va_end(args);
+primative *__make_initialize_none(primative *p, ...) {
 	return p;
 }
 
-// TODO: recursively find the copy function
+primative *(*__make_initialize_fn(primative_class c))(primative *, ...) {
+	if (c.initialize != NULL) {
+		return c.initialize;
+	} else if (c.super_primative != NULL) {
+		return __make_initialize_fn(*(c.super_primative));
+	}
+	return __make_initialize_none;
+}
 
 void *__copy(primative *p, primative_class c) {
 	if (c.copy != NULL) {
@@ -176,7 +189,3 @@ void destroy(void *v) {
 	}
 	free(p);
 }
-
-primative_class PrimativeNull = {
-	.ownership_count = 9999 // a really large number
-};

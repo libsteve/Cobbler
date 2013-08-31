@@ -3,13 +3,15 @@
 
 #include "primatives.h"
 
-declare_primative_begin(string, StringPrimative, primative)
+define_primative_begin(string, primative)
 	char *string;
 	size_t length;
-declare_primative_end(string)
+define_primative_end(string)
 
 char string_charAt(string *str, unsigned int index);
 
-#define PSTRING(__string) autodisown(make(StringPrimative, __string))
+bool string_isEqual(string *str, string *other);
+
+#define PSTRING(__string) autodisown(make(string, __string))
 
 #endif

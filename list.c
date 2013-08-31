@@ -2,7 +2,7 @@
 
 void node_destroy(node *);
 
-define_primative_class_begin(node, NodePrimative, PrimativeClass)
+define_primative_class_begin(node, primative)
 	primative_class_using_destroy(node_destroy) 
 define_primative_class_end(node)
 
@@ -10,7 +10,7 @@ void node_destroy(node *n) {
 	disown(n->value);
 	n->next->prev = n->prev;
 	n->prev->next = n->next;
-	PrimativeClass.destroy((primative *)n);
+	SuperDestroy(n);
 }
 
 node *node_initialize(node *n, node *prev, primative* value, node *next) {
@@ -31,16 +31,22 @@ primative *node_value(node *n) {
 	return NULL;
 }
 
-list *list_initialize(list *, va_list *args);
+list *list_initialize(list *);
 void list_destroy(list *);
 
-define_primative_class_begin(list, ListPr, NodePrimative)
+define_primative_class_begin(list, node)
 	primative_class_using_initialize(list_initialize)
 	primative_class_using_destroy(list_destroy) 
 define_primative_class_end(list)
 
-list *list_initialize(list *l, va_list *args) {
-	node_initialize((node *)l, NULL, (primative *)&PrimativeNull, NULL);
+// define_primative_begin(list_null, primative)
+// define_primative_end(list_null)
+// define_primative_class_begin(list_null, primative)
+// 	, .ownership_count = 9999
+// define_primative_class_end(list_null)
+
+list *list_initialize(list *l) {
+	node_initialize((node *)l, NULL, NULL, NULL);
 	return l;
 }
 
@@ -51,7 +57,7 @@ void list_destroy(list *l) {
 		disown(it);
 		it = next;
 	}
-	NodePrimative.destroy((primative *)l);
+	SuperDestroy(l);
 }
 
 primative *list_head(list *l) {
@@ -65,14 +71,14 @@ primative *list_tail(list *l) {
 }
 
 list *list_push(list *l, primative *p) {
-	node *n = make(NodePrimative);
+	node *n = make(node);
 	n = node_initialize(n, ((node *)l)->prev, p, (node *)l);
 	if (n) l->length += 1;
 	return l;
 }
 
 list *list_rpush(list *l, primative *p) {
-	node *n = make(NodePrimative);
+	node *n = make(node);
 	n = node_initialize(n, (node *)l, p, ((node *)l)->next);
 	if (n) l->length += 1;
 	return l;

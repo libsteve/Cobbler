@@ -1,6 +1,6 @@
 #include "number.h"
 
-define_primative_class_begin(number, NumberPrimative, ValuePrimative)
+define_primative_class_begin(number, value)
 define_primative_class_end(number)
 
 number *number_initWithInteger(number *num, int64_t integer) {

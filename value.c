@@ -6,19 +6,19 @@ void value_destroy(value *v) {
 			free(v->bytes);
 		if (v->type)
 			disown(v->type);
-		PrimativeClass.destroy((primative *)v);
+		SuperDestroy(v);
 	}
 }
 
 value *value_copy(value *v) {
 	if (v) {
-		value *new = make(ValuePrimative);
+		value *new = make(value);
 		new = value_initializeWithType(new, v->bytes, v->size, v->type);
 		return new;
 	} else return NULL;
 }
 
-define_primative_class_begin(value, ValuePrimative, PrimativeClass)
+define_primative_class_begin(value, primative)
 primative_class_using_destroy(value_destroy)
 primative_class_using_copy(value_copy) 
 define_primative_class_end(value)

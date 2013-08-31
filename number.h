@@ -4,7 +4,7 @@
 #include "primatives.h"
 #include "value.h"
 
-define_primative_begin(number, NumberPrimative, value)
+define_primative_begin(number, value)
 define_primative_end(number)
 
 number *number_initWithInteger        (number *num, int64_t  integer);

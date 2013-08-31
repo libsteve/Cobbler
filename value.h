@@ -4,7 +4,7 @@
 #include "primatives.h"
 #include "string.h"
 
-define_primative_begin(value, ValuePrimative, primative)
+define_primative_begin(value, primative)
 	void *bytes;
 	size_t size;
 	string *type;
