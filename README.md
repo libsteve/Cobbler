@@ -1,7 +1,11 @@
-Cobbler
+Cobbler: A C Object System
 =======
 
-A primitive object system using C macros and functions.
+Cobbler is an attempt to add objects to the C language in order to better understand the implementations of different kinds of object systems.
+
+A primitive static object system is being developed using just C Macros and functions.
+
+A dynamic object system library will also be created using a C framework.
 
 ##Goals
 
