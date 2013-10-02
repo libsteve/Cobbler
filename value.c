@@ -18,10 +18,6 @@ value *value_copy(value *v) {
 	} else return NULL;
 }
 
-primitive_class_define(value, primitive, 
-	using_destroy(value_destroy),
-	using_copy(value_copy));
-
 value *value_initialize(value *v, void *bytes, size_t size) {
 	if (v && v->bytes == NULL) {
 		v->bytes = calloc(size, sizeof(char));

@@ -3,17 +3,35 @@
 
 #include "primitive.h"
 
+////
+// node
+
+primitive_declare(node);
+
+void node_destroy(node *);
+
 primitive_define(node, primitive, {
-	struct node *next;
-	struct node *prev;
-	struct primitive *value;
-});
+		struct node *next;
+		struct node *prev;
+		struct primitive *value;
+	},
+	using_destroy(node_destroy));
 
 extern node *node_initialize(node *, node *prev, primitive *value, node *next);
 
+////
+// list
+
+primitive_declare(list);
+
+list *list_initialize(list *);
+void list_destroy(list *);
+
 primitive_define(list, node, {
-	size_t length;
-});
+		size_t length;
+	},
+	using_initialize(list_initialize),
+	using_destroy(list_destroy));
 
 extern primitive *list_head(list *l);
 extern primitive *list_tail(list *l);

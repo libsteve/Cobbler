@@ -1,10 +1,5 @@
 #include "list.h"
 
-void node_destroy(node *);
-
-primitive_class_define(node, primitive, 
-	using_destroy(node_destroy));
-
 void node_destroy(node *n) {
 	disown(n->value);
 	n->next->prev = n->prev;
@@ -29,13 +24,6 @@ primitive *node_value(node *n) {
 	}
 	return NULL;
 }
-
-list *list_initialize(list *);
-void list_destroy(list *);
-
-primitive_class_define(list, node,
-	using_initialize(list_initialize),
-	using_destroy(list_destroy));
 
 // define_primitive_begin(list_null, primitive)
 // define_primitive_end(list_null)

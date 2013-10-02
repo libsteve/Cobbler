@@ -10,26 +10,6 @@
 #define tss_t pthread_key_t
 
 /////////////////////////////////////////
-// primitive Definitions
-
-primitive *_default_initialize(primitive *p) {
-	return p;
-}
-
-primitive *_default_copy(primitive *p) {
-	return NULL;
-}
-
-void _default_destroy(primitive *p) {
-	return;
-}
-
-primitive_class_define(primitive, primitive,
-	using_initialize(_default_initialize),
-	using_copy(_default_copy),
-	using_destroy(_default_destroy));
-
-/////////////////////////////////////////
 // Autodisown Definitions
 
 static tss_t autodisown_pool_tss_id;
@@ -86,12 +66,12 @@ void autodisown_pool_destroy(autodisown_pool *pool) {
 		__set_autodisown_pool(pool->previous_pool);
 		disown(pool->previous_pool);
 	}
-	pool->primitive.destroy((primitive *)pool);
+	SuperDestroy(pool);
 }
 
-primitive_class_define(autodisown_pool, primitive, 
-	using_initialize(autodisown_pool_initialize),
-	using_destroy(autodisown_pool_destroy));
+// primitive_class_define(autodisown_pool, primitive, 
+// 	using_initialize(autodisown_pool_initialize),
+// 	using_destroy(autodisown_pool_destroy));
 
 void *own(void *v) {
 	primitive *p = v;
@@ -135,9 +115,9 @@ void *autodisown(void *v) {
 /////////////////////////////////////////
 // Creation Definitions
 
-primitive *__make_instance(primitive_class c) {
-	primitive *p = calloc(1, c.size);
-	p->primitive = c;
+primitive *__make_instance(primitive_class *c) {
+	primitive *p = calloc(1, c->size);
+	p->primitive = *c;
 	return own(p);
 }
 
@@ -145,11 +125,11 @@ primitive *__make_initialize_none(primitive *p, ...) {
 	return p;
 }
 
-primitive *(*__make_initialize_fn(primitive_class c))(primitive *, ...) {
-	if (c.initialize != NULL) {
-		return c.initialize;
-	} else if (c.super_primitive != NULL) {
-		return __make_initialize_fn(*(c.super_primitive));
+primitive *(*__make_initialize_fn(primitive_class *c))(primitive *, ...) {
+	if (c->initialize != NULL) {
+		return c->initialize;
+	} else if (c->super_primitive != NULL) {
+		return __make_initialize_fn(c->super_primitive);
 	}
 	return __make_initialize_none;
 }

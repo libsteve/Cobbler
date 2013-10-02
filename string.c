@@ -2,15 +2,6 @@
 
 #include <string.h>
 
-string *string_initialize(string *, char *);
-void string_destroy(string *);
-string *string_copy(string *);
-
-primitive_class_define(string, primitive, 
-	using_initialize(string_initialize),
-	using_destroy(string_destroy),
-	using_copy(string_copy));
-
 string *string_initialize(string *str, char *c_string) {
 	str->length = strlen(c_string);
 	str->string = strdup(c_string);
