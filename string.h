@@ -3,10 +3,10 @@
 
 #include "primitive.h"
 
-define_primitive_begin(string, primitive)
+primitive_define(string, primitive, {
 	char *string;
 	size_t length;
-define_primitive_end(string)
+});
 
 char string_charAt(string *str, unsigned int index);
 

@@ -4,11 +4,11 @@
 #include "primitive.h"
 #include "string.h"
 
-define_primitive_begin(value, primitive)
+primitive_define(value, primitive, {
 	void *bytes;
 	size_t size;
 	string *type;
-define_primitive_end(value)
+});
 
 value *value_initialize(value *v, void *bytes, size_t size);
 value *value_initializeWithType(value *v, void *bytes, size_t size, string *type);

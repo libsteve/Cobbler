@@ -18,10 +18,9 @@ value *value_copy(value *v) {
 	} else return NULL;
 }
 
-define_primitive_class_begin(value, primitive)
-primitive_class_using_destroy(value_destroy)
-primitive_class_using_copy(value_copy) 
-define_primitive_class_end(value)
+primitive_class_define(value, primitive, 
+	using_destroy(value_destroy),
+	using_copy(value_copy));
 
 value *value_initialize(value *v, void *bytes, size_t size) {
 	if (v && v->bytes == NULL) {

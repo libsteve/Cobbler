@@ -4,8 +4,7 @@
 #include "primitive.h"
 #include "value.h"
 
-define_primitive_begin(number, value)
-define_primitive_end(number)
+primitive_define(number, value, {});
 
 number *number_initWithInteger        (number *num, int64_t  integer);
 number *number_initWithUnsignedInteger(number *num, uint64_t integer);

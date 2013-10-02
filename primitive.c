@@ -24,11 +24,10 @@ void _default_destroy(primitive *p) {
 	return;
 }
 
-define_primitive_class_begin(primitive, primitive)
-	primitive_class_using_initialize(_default_initialize)
-	primitive_class_using_copy(_default_copy)
-	primitive_class_using_destroy(_default_destroy)   
-define_primitive_class_end(primitive)
+primitive_class_define(primitive, primitive,
+	using_initialize(_default_initialize),
+	using_copy(_default_copy),
+	using_destroy(_default_destroy));
 
 /////////////////////////////////////////
 // Autodisown Definitions
@@ -90,10 +89,9 @@ void autodisown_pool_destroy(autodisown_pool *pool) {
 	pool->primitive.destroy((primitive *)pool);
 }
 
-define_primitive_class_begin(autodisown_pool, primitive)
-	primitive_class_using_initialize(autodisown_pool_initialize)
-	primitive_class_using_destroy(autodisown_pool_destroy)
-define_primitive_class_end(autodisown_pool)
+primitive_class_define(autodisown_pool, primitive, 
+	using_initialize(autodisown_pool_initialize),
+	using_destroy(autodisown_pool_destroy));
 
 void *own(void *v) {
 	primitive *p = v;

@@ -39,23 +39,29 @@ extern primitive_class primitive_PrimitiveClass;
 
 /* macros for declaring the existance and structure of primitives (for .h file) */
 
-#define define_primitive_begin(primitive_name, super_primitive) extern primitive_class PrimitiveClassForPrimitive(primitive_name); typedef struct primitive_name { inherit_primitive(super_primitive);
-#define define_primitive_end(primitive_name)                    } primitive_name;
+#define primitive_define(primitive_name, super_primitive, structure) \
+	extern primitive_class PrimitiveClassForPrimitive(primitive_name); \
+	typedef struct primitive_name { inherit_primitive(super_primitive); struct structure; } primitive_name;
+
+// #define define_primitive_begin(primitive_name, super_primitive) extern primitive_class PrimitiveClassForPrimitive(primitive_name); typedef struct primitive_name { inherit_primitive(super_primitive);
+// #define define_primitive_end(primitive_name)                    } primitive_name;
 
 /* marcos for defining the creation and destruction of primitives (for .c file) */
 
-#define define_primitive_class_begin(primitive_name, super_primitive_name) primitive_class PrimitiveClassForPrimitive(primitive_name) = { .size = sizeof(struct primitive_name), .super_primitive = &PrimitiveClassForPrimitive(super_primitive_name) 
-#define primitive_class_using_initialize(initialize_function) , .initialize = (init_fn)&initialize_function
-#define primitive_class_using_destroy(destroy_function)       , .destroy = (destroy_fn)&destroy_function
-#define primitive_class_using_copy(copy_function)             , .copy = (copy_fn)&copy_function
-#define define_primitive_class_end(primitive_name) };
+#define primitive_class_define(primitive_name, super_primitive_name, ...) \
+	primitive_class PrimitiveClassForPrimitive(primitive_name) = { \
+		.size = sizeof(struct primitive_name), \
+		.super_primitive = &PrimitiveClassForPrimitive(super_primitive_name), ## __VA_ARGS__ };
+#define using_initialize(fn)	.initialize = (init_fn)&fn
+#define using_destroy(fn) 		.destroy = (destroy_fn)&fn
+#define using_copy(fn)			.copy = (copy_fn)&fn
 
 #define output *
 
-define_primitive_begin(autodisown_pool, primitive_class)
+primitive_define(autodisown_pool, primitive_class, {
 	struct autodisown_pool *previous_pool;
 	struct primitive **autodisowned_objects;
-define_primitive_end(autodisown_pool)
+});
 
 extern void *own(void *);
 extern void *disown(void *);

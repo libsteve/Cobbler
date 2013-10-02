@@ -2,9 +2,8 @@
 
 void node_destroy(node *);
 
-define_primitive_class_begin(node, primitive)
-	primitive_class_using_destroy(node_destroy) 
-define_primitive_class_end(node)
+primitive_class_define(node, primitive, 
+	using_destroy(node_destroy));
 
 void node_destroy(node *n) {
 	disown(n->value);
@@ -34,10 +33,9 @@ primitive *node_value(node *n) {
 list *list_initialize(list *);
 void list_destroy(list *);
 
-define_primitive_class_begin(list, node)
-	primitive_class_using_initialize(list_initialize)
-	primitive_class_using_destroy(list_destroy) 
-define_primitive_class_end(list)
+primitive_class_define(list, node,
+	using_initialize(list_initialize),
+	using_destroy(list_destroy));
 
 // define_primitive_begin(list_null, primitive)
 // define_primitive_end(list_null)

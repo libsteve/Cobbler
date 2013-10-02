@@ -1,7 +1,6 @@
 #include "number.h"
 
-define_primitive_class_begin(number, value)
-define_primitive_class_end(number)
+primitive_class_define(number, value);
 
 number *number_initWithInteger(number *num, int64_t integer) {
 	return (number *)value_initializeWithType((value *)num, &integer, sizeof(integer), PSTRING("int"));

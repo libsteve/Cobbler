@@ -3,17 +3,17 @@
 
 #include "primitive.h"
 
-define_primitive_begin(node, primitive)
+primitive_define(node, primitive, {
 	struct node *next;
 	struct node *prev;
 	struct primitive *value;
-define_primitive_end(node)
+});
 
 extern node *node_initialize(node *, node *prev, primitive *value, node *next);
 
-define_primitive_begin(list, node)
+primitive_define(list, node, {
 	size_t length;
-define_primitive_end(list)
+});
 
 extern primitive *list_head(list *l);
 extern primitive *list_tail(list *l);
