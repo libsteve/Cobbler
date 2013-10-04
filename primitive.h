@@ -19,6 +19,7 @@ typedef primitive *(*copy_fn)(primitive *);         // copy_fn
 
 struct primitive_class {
 	size_t      size;
+	const char  *classname;
 	init_fn     initialize;
 	destroy_fn  destroy;
 	copy_fn     copy;
@@ -30,6 +31,7 @@ struct primitive_class {
 #define PrimitiveClassForPrimitive(p) p ## _PrimitiveClass ()
 #define inherit_primitive(super_primitive) super_primitive primitive
 #define SuperPrimitiveClass(p) (*(PrimitiveClass(p).super_primitive))
+#define PrimitiveClassName(p) #p
 
 /* macros for declaring the existance and structure of primitives (for .h file) */
 
@@ -46,6 +48,7 @@ struct primitive_class {
 			setup = false; \
 			c = (primitive_class){ \
 				.size = sizeof(struct primitive_name), \
+				.classname = PrimitiveClassName(primitive_name), \
 				.super_primitive = PrimitiveClassForPrimitive(super_primitive_name), ## __VA_ARGS__ }; \
 		} \
 		return &c; \
