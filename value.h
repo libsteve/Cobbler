@@ -17,9 +17,9 @@ primitive_define(value, primitive, {
     using_virtual(value, destroy),
     using_virtual(value, copy));
 
-extern value    *method(value, initialize,         	void *bytes, size_t size);
-extern value    *method(value, initializeWithType,	void *bytes, size_t size, string *type);
-extern void     *method(value, value,				size_t output size);
-extern string	*method(value, type);
+extern value    *method(value, initialize,          void *bytes, size_t size);
+extern value    *method(value, initializeWithType,  void *bytes, size_t size, string *type);
+extern void     *method(value, value,               size_t output size);
+extern string   *method(value, type);
 
 #endif
