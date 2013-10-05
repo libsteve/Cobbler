@@ -33,7 +33,46 @@ The primitive static object system is seeing progress. It has not yet seen any t
 Implemented primitive objects include a linked-list primitive, string primitive, and a value/number primitive.
 Primitive objects follow the reference counting memory management model, with a posix-compliant thread-safe autorelease implementation. (These are known as own, disown, and autodisown)
 
-##Things to come
+##Primitive Objects Usage
 
-- Tests for the primitive static object system.
-- A dynamic object system framework, implemented using the primitive object system.
+To define a new primitive object, use the `primitive_define()` macro function.
+Pass in the name of the primitive, the super primitive, a structure to represent the data, and any virtual methods used. Virtual methods are added using the `using_virtual()` macro function after the structure is defined.
+
+	primitive_define(my_primitive, primitive, {
+			int a_number;
+			char a_char;
+		},
+		using_virtual(my_primitive, create),
+		using_virtual(my_primitive, destroy));
+
+You can forward-declare the primitive using the `primitive_declare()` macro.
+This can be useful when using the `method()` macro for declaring virtual methods for the primitive before you define the primitive itself.
+
+	primitive_declare(my_primitive)
+
+	my_primitive *method(my_primitive, create, int a_number, char a_char);
+	void          method(my_primitive, destroy);
+	int           method(my_primitive, getNumber);
+
+	primitive_define(my_primitive, primitive, {
+			int a_number;
+			char a_char;
+		},
+		using_virtual(my_primitive, create),
+		using_virtual(my_primitive, destroy),
+		using_virtual(my_primitive, getNumber));
+
+The `method()` macro can be used for defining non-virtual methods too.
+
+	int method(my_primitive, non_virtual_method);
+
+Virtual methods are called using the `virtual_call()` macro function, whereas non-virtual methods can either be called directly or through the `static_call()` macro function. 
+
+The `virtual_call()` macro must be supplied with the return type, followed by the virtual method name, the primitive instance, and then finally any function arguments for the method.
+
+The `static_call()` macro must be supplied with the primitive name, followed by the method name, the primitive instance, and then finally any function arguments for the method.
+
+	my_primitive *p = create(my_primitive, 10, 'a');
+
+	int result = static_call(my_primitive, non_virtual_method, p);
+
