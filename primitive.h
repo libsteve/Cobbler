@@ -6,12 +6,15 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
-struct primitive_class;
 struct primitive;
+struct primitive_class;
+struct virtual_method;
 
 typedef struct primitive       primitive;           // primitive
 typedef struct primitive_class primitive_class;     // primitive_class
+typedef struct virtual_method  virtual_method;
 
 typedef primitive *(*init_fn)(primitive *, ...);	// init_fn
 typedef void (*destroy_fn)(primitive *);          	// destroy_fn
@@ -20,18 +23,40 @@ typedef primitive *(*copy_fn)(primitive *);         // copy_fn
 struct primitive_class {
 	size_t      size;
 	const char  *classname;
-	init_fn     initialize;
-	destroy_fn  destroy;
-	copy_fn     copy;
+	size_t      method_count;
 	size_t      ownership_count;
-	struct primitive_class *super_primitive;
+	struct virtual_method   *methods;
+	struct primitive_class  *super_primitive;
 };
 
 #define PrimitiveClass(p) (*(primitive_class *)(p))
 #define PrimitiveClassForPrimitive(p) p ## _PrimitiveClass ()
 #define inherit_primitive(super_primitive) super_primitive primitive
-#define SuperPrimitiveClass(p) (*(PrimitiveClass(p).super_primitive))
+#define SuperPrimitiveClass(p) (PrimitiveClass(p).super_primitive)
 #define PrimitiveClassName(p) #p
+
+struct virtual_method {
+	const char *signature;
+	void *functionpointer;
+};
+
+static inline void *virtual_method_lookup(primitive_class *c, const char *fn) {
+	for (int i = 0; i < c->method_count; i++) {
+		if (strcmp(c->methods[i].signature, fn) == 0) {
+			return c->methods[i].functionpointer;
+		}
+	}
+	if (c->super_primitive != NULL) {
+		return virtual_method_lookup(c->super_primitive, fn);
+	}
+	return (void *)0;
+}
+
+#define method_name(primitive_name, fn) primitive_name ## _ ## fn
+#define method(primitive_name, fn, ...) method_name(primitive_name, fn) (primitive_name *self, ## __VA_ARGS__)
+#define virtual_call(returns, instance, fn, ...) ((returns (*)(void *, ...)) virtual_method_lookup((primitive_class *)instance, #fn)) (instance, ## __VA_ARGS__)
+#define static_call(primitive_name, instance, fn, ...) method_name(primitive_name, fn) ((primitive_name *)instance, ## __VA_ARGS__)
+#define using_virtual(primitive_name, fn) (struct virtual_method){ .signature = #fn , .functionpointer = (void *)& method_name(primitive_name, fn) }
 
 /* macros for declaring the existance and structure of primitives (for .h file) */
 
@@ -44,39 +69,43 @@ struct primitive_class {
 	static inline primitive_class * PrimitiveClassForPrimitive(primitive_name) { \
 		static bool setup = true; \
 		static primitive_class c; \
+		static virtual_method methods[] = { __VA_ARGS__ }; \
 		if (setup) { \
 			setup = false; \
 			c = (primitive_class){ \
 				.size = sizeof(struct primitive_name), \
 				.classname = PrimitiveClassName(primitive_name), \
-				.super_primitive = PrimitiveClassForPrimitive(super_primitive_name), ## __VA_ARGS__ }; \
+				.method_count = sizeof(methods) / sizeof(struct virtual_method), \
+				.methods = methods, \
+				.super_primitive = PrimitiveClassForPrimitive(super_primitive_name)}; \
 		} \
 		return &c; \
 	}
-#define using_initialize(fn)	.initialize = (init_fn)&fn
-#define using_destroy(fn) 		.destroy = (destroy_fn)&fn
-#define using_copy(fn)			.copy = (copy_fn)&fn
 
 struct primitive {
 	primitive_class primitive;
 };
 
-static inline primitive *_default_initialize(primitive *p) { return p; }
-static inline primitive *_default_copy(primitive *p) { return NULL; }
-static inline void _default_destroy(primitive *p) { return; }
+static inline primitive *method(primitive, initialize) { return self; }
+static inline primitive *method(primitive, copy) { return NULL; }
+static inline void method(primitive, destroy) { return; }
 
 static inline primitive_class * PrimitiveClassForPrimitive(primitive) {
 	static bool setup = true;
 	static primitive_class c;
+	static virtual_method methods[] = {
+		using_virtual(primitive, initialize),
+		using_virtual(primitive, copy),
+		using_virtual(primitive, destroy)
+	};
 	if (setup) {
 		setup = false;
 		c = (primitive_class){
 			.size = sizeof(struct primitive),
-			.super_primitive = PrimitiveClassForPrimitive(primitive),
-			using_initialize(_default_initialize),
-			using_copy(_default_copy),
-			using_destroy(_default_destroy)
-		};
+			.classname = PrimitiveClassName(primitive),
+			.method_count = sizeof(methods) / sizeof(struct virtual_method),
+			.methods = methods,
+			.super_primitive = NULL};
 	}
 	return &c;
 }
@@ -86,28 +115,27 @@ static inline primitive_class * PrimitiveClassForPrimitive(primitive) {
 #define output *
 
 primitive_declare(autodisown_pool);
-autodisown_pool *autodisown_pool_initialize(autodisown_pool *pool, va_list *args);
-void autodisown_pool_destroy(autodisown_pool *pool);
+autodisown_pool *method(autodisown_pool, initialize, va_list *args);
+void method(autodisown_pool, destroy);
 primitive_define(autodisown_pool, primitive, {
 		struct autodisown_pool *previous_pool;
 		struct primitive **autodisowned_objects;
 	},
-	using_initialize(autodisown_pool_initialize), 
-	using_destroy(autodisown_pool_destroy));
+	using_virtual(autodisown_pool, initialize), 
+	using_virtual(autodisown_pool, destroy));
 
 extern void *own(void *);
 extern void *disown(void *);
 extern void *autodisown(void *);
 
 primitive *__make_instance(primitive_class *c);
-primitive *(*__make_initialize_fn(primitive_class *c))(primitive *, ...);
-#define __make(primitive_class_name, ...) __make_initialize_fn(primitive_class_name)(__make_instance(primitive_class_name) , ## __VA_ARGS__)
+#define __make(primitive_class_struct, ...)  virtual_call(void *, __make_instance(primitive_class_struct), initialize, ## __VA_ARGS__)
 #define make(primitive_name, ...) (primitive_name *)__make(PrimitiveClassForPrimitive(primitive_name) , ## __VA_ARGS__)
 extern void *copy(void *);
 extern void destroy(void *);
 
-#define SuperInitialize(p, ...) SuperPrimitiveClass(p).initialize(p , ## __VA_ARGS__)
-#define SuperCopy(p) SuperPrimitiveClass(p).copy((primitive *)p)
-#define SuperDestroy(p) SuperPrimitiveClass(p).destroy((primitive *)p)
+#define SuperInitialize(p, ...) virtual_call(primitive *, SuperPrimitiveClass(p), initialize, ## __VA_ARGS__)
+#define SuperCopy(p) virtual_call(primitive *, SuperPrimitiveClass(p), copy)
+#define SuperDestroy(p) virtual_call(void, SuperPrimitiveClass(p), destroy)
 
 #endif

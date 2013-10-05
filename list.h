@@ -15,7 +15,7 @@ primitive_define(node, primitive, {
 		struct node *prev;
 		struct primitive *value;
 	},
-	using_destroy(node_destroy));
+	using_virtual(node, destroy));
 
 extern node *node_initialize(node *, node *prev, primitive *value, node *next);
 
@@ -24,14 +24,14 @@ extern node *node_initialize(node *, node *prev, primitive *value, node *next);
 
 primitive_declare(list);
 
-list *list_initialize(list *);
-void list_destroy(list *);
+list *method(list, initialize);
+void method(list, destroy);
 
 primitive_define(list, node, {
 		size_t length;
 	},
-	using_initialize(list_initialize),
-	using_destroy(list_destroy));
+	using_virtual(list, initialize),
+	using_virtual(list, destroy));
 
 extern primitive *list_head(list *l);
 extern primitive *list_tail(list *l);

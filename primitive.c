@@ -121,49 +121,19 @@ primitive *__make_instance(primitive_class *c) {
 	return own(p);
 }
 
-primitive *__make_initialize_none(primitive *p, ...) {
-	return p;
-}
-
-primitive *(*__make_initialize_fn(primitive_class *c))(primitive *, ...) {
-	if (c->initialize != NULL) {
-		return c->initialize;
-	} else if (c->super_primitive != NULL) {
-		return __make_initialize_fn(c->super_primitive);
-	}
-	return __make_initialize_none;
-}
-
-void *__copy(primitive *p, primitive_class c) {
-	if (c.copy != NULL) {
-		return c.copy(p);
-	} else if (c.super_primitive != NULL) {
-		return __copy(p, *(c.super_primitive));
-	}
-	return NULL;
-}
-
 void *copy(void *v) {
 	primitive *p = v;
 	primitive *copy = NULL;
 	if (p != NULL) {
-		copy = __copy(p, PrimitiveClass(p));
+		copy = virtual_call(primitive *, p, copy);
 	}
 	return copy;
-}
-
-void __destroy(primitive *p, primitive_class c) {
-	if (c.destroy != NULL) {
-		c.destroy(p);
-	} else if (c.super_primitive != NULL) {
-		__destroy(p, *(c.super_primitive));
-	}
 }
 
 void destroy(void *v) {
 	primitive *p = v;
 	if (p != NULL) {
-		__destroy(p, PrimitiveClass(p));
+		virtual_call(void, p, destroy);
 	}
 	free(p);
 }

@@ -5,17 +5,17 @@
 
 primitive_declare(string);
 
-string *string_initialize(string *, char *);
-void string_destroy(string *);
-string *string_copy(string *);
+string *method(string, initialize, char *);
+void method(string, destroy);
+string *method(string, copy);
 
 primitive_define(string, primitive, {
-		char *string;
+		char *str;
 		size_t length;
 	},
-	using_initialize(string_initialize),
-	using_destroy(string_destroy),
-	using_copy(string_copy));
+	using_virtual(string, initialize),
+	using_virtual(string, destroy),
+	using_virtual(string, copy));
 
 char string_charAt(string *str, unsigned int index);
 
