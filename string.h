@@ -5,9 +5,9 @@
 
 primitive_declare(string);
 
-extern string *method(string, create, const char *);
+extern string  *method(string, create, const char *);
 extern void     method(string, destroy);
-extern string *method(string, copy);
+extern string  *method(string, copy);
 
 extern char     method(string, charAt, unsigned int index);
 extern bool     method(string, isEqual, string *other);
