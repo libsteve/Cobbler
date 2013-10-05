@@ -74,5 +74,6 @@ The `static_call()` macro must be supplied with the primitive name, followed by 
 
 	my_primitive *p = create(my_primitive, 10, 'a');
 
-	int result = static_call(my_primitive, non_virtual_method, p);
+	int result = virtual_call(int, getNumber, p);
+	int other  = static_call(my_primitive, non_virtual_method, p);
 
