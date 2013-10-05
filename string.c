@@ -2,33 +2,38 @@
 
 #include <string.h>
 
-string *string_initialize(string *str, char *c_string) {
-	str->length = strlen(c_string);
-	str->str = strdup(c_string);
-	return str;
+string *
+method(string, create, const char *c_string) {
+    this->length = strlen(c_string);
+    this->str = strdup(c_string);
+    return this;
 }
 
-void string_destroy(string *str) {
-	free(str->str);
-	SuperDestroy(str);
+void 
+method(string, destroy) {
+    free(this->str);
+    SuperDestroy(this);
 }
 
-string *string_copy(string *str) {
-	return make(string, str->str);
+string *
+method(string, copy) {
+    return create(string, this->str);
 }
 
-char string_charAt(string *str, unsigned int index) {
-	if (str->length == 0) {
-		return '\0';
-	}
-	if (index >= str->length) {
-		index = str->length - 1;
-	}
-	return str->str[index];
+char
+method(string, charAt, unsigned int index) {
+    if (this->length == 0) {
+        return '\0';
+    }
+    if (index >= this->length) {
+        index = this->length - 1;
+    }
+    return this->str[index];
 }
 
-bool string_isEqual(string *str, string *other) {
-	if (strcmp(str->str, other->str) == 0)
-		return true;
-	return false;
+bool
+method(string, isEqual, string *other) {
+    if (strcmp(this->str, other->str) == 0)
+        return true;
+    return false;
 }

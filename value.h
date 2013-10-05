@@ -6,20 +6,20 @@
 
 primitive_declare(value);
 
-void method(value, destroy);
-value *method(value, copy);
+extern void    method(value, destroy);
+extern value  *method(value, copy);
 
 primitive_define(value, primitive, {
-		void *bytes;
-		size_t size;
-		string *type;
-	}, 
-	using_virtual(value, destroy),
-	using_virtual(value, copy));
+        void *bytes;
+        size_t size;
+        string *type;
+    }, 
+    using_virtual(value, destroy),
+    using_virtual(value, copy));
 
-value *value_initialize(value *v, void *bytes, size_t size);
-value *value_initializeWithType(value *v, void *bytes, size_t size, string *type);
-void *value_value(value *v, size_t output size);
-string *value_type(value *v);
+extern value    *method(value, initialize,         	void *bytes, size_t size);
+extern value    *method(value, initializeWithType,	void *bytes, size_t size, string *type);
+extern void     *method(value, value,				size_t output size);
+extern string	*method(value, type);
 
 #endif

@@ -1,60 +1,66 @@
 #include "value.h"
 
-void value_destroy(value *v) {
-	if (v) {
-		if (v->bytes)
-			free(v->bytes);
-		if (v->type)
-			disown(v->type);
-		SuperDestroy(v);
-	}
+void
+method(value, destroy) {
+    if (this) {
+        if (this->bytes)
+            free(this->bytes);
+        if (this->type)
+            disown(this->type);
+        SuperDestroy(this);
+    }
 }
 
-value *value_copy(value *v) {
-	if (v) {
-		value *new = make(value);
-		new = value_initializeWithType(new, v->bytes, v->size, v->type);
-		return new;
-	} else return NULL;
+value *
+method(value, copy) {
+    if (this) {
+        value *new = create(value);
+        new = value_initializeWithType(new, this->bytes, this->size, this->type);
+        return new;
+    } else return NULL;
 }
 
-value *value_initialize(value *v, void *bytes, size_t size) {
-	if (v && v->bytes == NULL) {
-		v->bytes = calloc(size, sizeof(char));
-		for (int i=0; i<size; i++) {
-			((char *)v->bytes)[i] = ((char *)bytes)[i];
-		}
-		v->size = size;
-	}
-	return v;
+value *
+method(value, initialize, void *bytes, size_t size) {
+    if (this && this->bytes == NULL) {
+        this->bytes = calloc(size, sizeof(char));
+        for (int i=0; i<size; i++) {
+            ((char *)this->bytes)[i] = ((char *)bytes)[i];
+        }
+        this->size = size;
+    }
+    return this;
 }
 
-value *value_initializeWithType(value *v, void *bytes, size_t size, string *type) {
-	v = value_initialize(v, bytes, size);
-	if (v && v->type == NULL) {
-		v->type = copy(type);
-	}
-	return v;
+value *
+method(value, initializeWithType, void *bytes, size_t size, string *type) {
+    this = static_call(value, initialize, this, bytes, size);
+    if (this && this->type == NULL) {
+        this->type = copy(type);
+    }
+    return this;
 }
 
-void *value_value(value *v, size_t output size) {
-	size_t out_size = 0;
-	char *out_value = NULL;
-	if (v) {
-		if (v->bytes) {
-			out_value = v->bytes;
-			out_size = v->size;
-		}
-	}
-	if (size) {
-		*size = out_size;
-	}
-	return out_value;
+void *
+method(value, value, size_t output size) {
+    size_t out_size = 0;
+    char *out_value = NULL;
+    if (this) {
+        if (this->bytes) {
+            out_value = this->bytes;
+            out_size = this->size;
+        }
+    }
+    if (size) {
+        *size = out_size;
+    }
+    return out_value;
 }
 
-string *value_type(value *v) {
-	if (v) {
-		return v->type;
-	}
-	return NULL;
+string *
+method(value, type) {
+    if (this) {
+        return this->type;
+    }
+    return NULL;
 }

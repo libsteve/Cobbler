@@ -3,47 +3,47 @@
 
 #include "primitive.h"
 
-////
+//////
 // node
 
 primitive_declare(node);
 
-void node_destroy(node *);
+extern void method(node, destroy);
 
 primitive_define(node, primitive, {
-		struct node *next;
-		struct node *prev;
-		struct primitive *value;
-	},
-	using_virtual(node, destroy));
+        struct node *next;
+        struct node *prev;
+        struct primitive *value;
+    },
+    using_virtual(node, destroy));
 
-extern node *node_initialize(node *, node *prev, primitive *value, node *next);
+extern node *method(node, initialize, node *prev, primitive *value, node *next);
 
-////
+//////
 // list
 
 primitive_declare(list);
 
-list *method(list, initialize);
-void method(list, destroy);
+extern list   *method(list, create);
+extern void    method(list, destroy);
 
 primitive_define(list, node, {
-		size_t length;
-	},
-	using_virtual(list, initialize),
-	using_virtual(list, destroy));
+        size_t length;
+    },
+    using_virtual(list, create),
+    using_virtual(list, destroy));
 
-extern primitive *list_head(list *l);
-extern primitive *list_tail(list *l);
+extern primitive *method(list, head);
+extern primitive *method(list, tail);
 
-extern list *list_push (list *l, primitive *p);
-extern list *list_rpush(list *l, primitive *p);
+extern list *method(list,  push, primitive *p);
+extern list *method(list, rpush, primitive *p);
 
-extern primitive *list_peek (list *l);
-extern primitive *list_rpeek(list *l);
+extern primitive *method(list,  peek);
+extern primitive *method(list, rpeek);
 
-extern list *list_pop (list *l, primitive *output p);
-extern list *list_rpop(list *l, primitive *output p);
+extern list *method(list,  pop, primitive *output p);
+extern list *method(list, rpop, primitive *output p);
 
 #define VALUE(it) (((node *)it)->value)
 #define LIST_FOREACH(it, l) for(node *it = ((node *)l)->next; ((node *)l)->value != &primitiveNull; it = it->next)
