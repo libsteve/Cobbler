@@ -39,8 +39,10 @@ method(custom, print)
 
 int main()
 {
+    // autodisown_pool *p = create(autodisown_pool);
     custom *c = create(custom);
     static_call(custom, print, c);
     disown(c);
+    // disown(p);
     return 0;
 }

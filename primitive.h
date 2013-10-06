@@ -76,9 +76,13 @@ struct virtual_method {
 //////
 // interacting with primitive structures
 
+#include <stdio.h>
+
 static inline void *(*virtual_method_lookup(primitive_class *c, const char *fn))(void *, ...) {
+    printf("searching for %s in class %s\n", fn, c->classname);
     for (int i = 0; i < c->method_count; i++) {
         if (strcmp(c->methods[i].signature, fn) == 0) {
+            printf("found\n");
             return c->methods[i].functionpointer;
         }
     }
@@ -105,7 +109,7 @@ static inline void *(*virtual_method_lookup(primitive_class *c, const char *fn))
 // creating primitive structure instances
 
 extern primitive *__create_instance(primitive_class *c);
-#define create(primitive_name, ...) virtual_call(primitive_name *, initialize, __create_instance(PrimitiveClassForPrimitive(primitive_name)), ## __VA_ARGS__)
+#define create(primitive_name, ...) virtual_call(primitive_name *, create, __create_instance(PrimitiveClassForPrimitive(primitive_name)), ## __VA_ARGS__)
 extern void *copy(void *);
 extern void destroy(void *);
 

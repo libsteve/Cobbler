@@ -2,8 +2,14 @@
 
 void node_destroy(node *n) {
     disown(n->value);
-    n->next->prev = n->prev;
-    n->prev->next = n->next;
+    if (n->next && n->prev) {
+        n->next->prev = n->prev;
+        n->prev->next = n->next;
+    } else if (n->next) {
+        n->next->prev = NULL;
+    } else if (n->prev) {
+        n->prev->next = NULL;
+    }
     SuperDestroy(n);
 }
 
@@ -12,8 +18,8 @@ node *node_initialize(node *n, node *prev, primitive* value, node *next) {
         n->prev = prev;
         n->value = own(value);
         n->next = next;
-        prev->next = n;
-        next->prev = n;
+        if (prev) prev->next = n;
+        if (next) next->prev = n;
     }
     return n;
 }
@@ -32,7 +38,7 @@ primitive *node_value(node *n) {
 // define_primitive_class_end(list_null)
 
 list *list_create(list *l) {
-    node_initialize((node *)l, NULL, NULL, NULL);
+    node_initialize((node *)l, (node *)l, NULL, (node *)l);
     return l;
 }
 

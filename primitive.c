@@ -14,7 +14,7 @@ void *copy(void *v) {
     primitive *p = v;
     primitive *copy = NULL;
     if (p != NULL) {
-        copy = virtual_call(primitive *, p, copy);
+        copy = virtual_call(primitive *, copy, p);
     }
     return copy;
 }
@@ -22,7 +22,7 @@ void *copy(void *v) {
 void destroy(void *v) {
     primitive *p = v;
     if (p != NULL) {
-        virtual_call(void, p, destroy);
+        virtual_call(void, destroy, p);
     }
     free(p);
 }
@@ -47,13 +47,18 @@ void *own(void *v) {
 
 void *disown(void *v) {
     primitive *p = v;
+    printf("attempt disown\n");
     if (p != NULL) {
         if (PrimitiveCast(primitive_class, p)->ownership_count == 0) {
+            printf("cannot disown without ownership count\n");
             return p;
         }
+        printf("disowning\n");
         PrimitiveCast(primitive_class, p)->ownership_count -= 1;
         if (PrimitiveCast(primitive_class, p)->ownership_count == 0) {
+            printf("destroying\n");
             destroy(p);
+            return NULL;
         }
     }
     return p;
@@ -93,7 +98,7 @@ autodisown_pool *__autodisown_pool() {
     return tss_get(autodisown_pool_tss_id);
 }
 
-autodisown_pool *method(autodisown_pool, initialize) {
+autodisown_pool *method(autodisown_pool, create) {
     autodisown_pool *pool = this;
     if (pool) {
         static bool thread_specific_storage_is_initialized = false;
@@ -130,12 +135,16 @@ void method(autodisown_pool, destroy) {
 }
 
 void *autodisown(void *v) {
+    return v;
+    // TODO: fix the autodisown feature
     primitive *p = v;
     autodisown_pool *pool = __autodisown_pool();
+    printf("attempting autodisown\n");
     if (pool) {
+        printf("autodisowning\n");
         int count = 0;
-        for (int i=0; pool->autodisowned_objects[i] != NULL; i++, count++) {
-            primitive *autodisowned = pool->autodisowned_objects[i];
+        for (; pool->autodisowned_objects[count] != NULL; count++) {
+            primitive *autodisowned = pool->autodisowned_objects[count];
             if (autodisowned == p)
                 return p;
         }
