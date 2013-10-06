@@ -37,3 +37,8 @@ method(string, isEqual, string *other) {
         return true;
     return false;
 }
+
+const char *
+method(string, c_string) {
+    return this->str;
+}

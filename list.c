@@ -31,7 +31,7 @@ primitive *node_value(node *n) {
 //     , .ownership_count = 9999
 // define_primitive_class_end(list_null)
 
-list *list_initialize(list *l) {
+list *list_create(list *l) {
     node_initialize((node *)l, NULL, NULL, NULL);
     return l;
 }

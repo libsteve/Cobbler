@@ -12,6 +12,8 @@ extern string  *method(string, copy);
 extern char     method(string, charAt, unsigned int index);
 extern bool     method(string, isEqual, string *other);
 
+extern const char *method(string, c_string);
+
 primitive_define(string, primitive, {
         char *str;
         size_t length;
@@ -20,6 +22,6 @@ primitive_define(string, primitive, {
     using_virtual(string, destroy),
     using_virtual(string, copy));
 
-#define PSTRING(__string) autodisown(make(string, __string))
+#define PSTRING(__string) autodisown(create(string, __string))
 
 #endif

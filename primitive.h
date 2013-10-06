@@ -63,7 +63,7 @@ struct virtual_method {
         static virtual_method methods[] = { __VA_ARGS__ }; \
         if (setup) { \
             setup = false; \
-            c = (primitive_class){ \
+            c = (struct primitive_class){ \
                 .size = sizeof(struct primitive_name), \
                 .classname = PrimitiveClassName(primitive_name), \
                 .method_count = sizeof(methods) / sizeof(struct virtual_method), \

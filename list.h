@@ -46,6 +46,6 @@ extern list *method(list,  pop, primitive *output p);
 extern list *method(list, rpop, primitive *output p);
 
 #define VALUE(it) (((node *)it)->value)
-#define LIST_FOREACH(it, l) for(node *it = ((node *)l)->next; ((node *)l)->value != &primitiveNull; it = it->next)
+#define LIST_FOREACH(it, l) for(node *it = ((node *)l)->next; ((node *)l) != it; it = it->next)
 
 #endif
