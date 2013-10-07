@@ -7,7 +7,7 @@ method(value, destroy) {
             free(this->bytes);
         if (this->type)
             disown(this->type);
-        SuperDestroy(primitive, this);
+        SuperDestroy();
     }
 }
 
@@ -15,7 +15,7 @@ value *
 method(value, copy) {
     if (this) {
         value *new = create(value);
-        new = value_initializeWithType(new, this->bytes, this->size, this->type);
+        new = static_call(value, initializeWithType, new, this->bytes, this->size, this->type);
         return new;
     } else return NULL;
 }

@@ -12,7 +12,7 @@ method(string, create, const char *c_string) {
 void 
 method(string, destroy) {
     free(this->str);
-    SuperDestroy(primitive, this);
+    SuperDestroy();
 }
 
 string *

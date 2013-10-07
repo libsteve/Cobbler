@@ -18,6 +18,7 @@ struct virtual_method;
 typedef struct primitive       primitive;           // primitive
 typedef struct primitive_class primitive_class;     // primitive_class
 typedef struct virtual_method  virtual_method;      // virtual_method
+typedef void *(*virtual_method_fn)(void *, void *, const char *, ...);  // virtual method function pointer
 
 struct primitive_class {
     size_t      size;                          // how much size the primitive struct takes up
@@ -34,8 +35,8 @@ struct primitive {
 };
 
 struct virtual_method {
-    const char *signature;                     // a string representation for the method
-    void *(*functionpointer)(void *, ...);     // a function pointer to the method implemenation
+    const char        *signature;       // a string representation for the method
+    virtual_method_fn functionpointer; // a function pointer to the method implemenation
 };
 
 //////
@@ -46,9 +47,9 @@ struct virtual_method {
 #define PrimitiveClassName(p)                   #p
 
 #define method_name(primitive_name, fn)         primitive_name ## _ ## fn
-#define method(primitive_name, fn, ...)         method_name(primitive_name, fn) (primitive_name *this , ## __VA_ARGS__)
+#define method(primitive_name, fn, ...)         method_name(primitive_name, fn) (primitive_name *this , primitive_class *this_class , const char *this_method , ## __VA_ARGS__)
 
-#define using_custom_virtual(fn, fn_name)       (struct virtual_method){ .signature = #fn_name , .functionpointer = (void *(*)(void *, ...))& fn }
+#define using_custom_virtual(fn, fn_name)       (struct virtual_method){ .signature = #fn_name , .functionpointer = (virtual_method_fn)& fn }
 #define using_virtual(primitive_name, fn)       using_custom_virtual(method_name(primitive_name, fn), fn)
 
 #define primitive_declare(primitive_name)       struct primitive_name; typedef struct primitive_name primitive_name;
@@ -78,7 +79,7 @@ struct virtual_method {
 
 #include <stdio.h>
 
-static inline void *(*virtual_method_lookup(primitive_class *c, const char *fn))(void *, ...) {
+static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const char *fn) {
     // printf("searching for %s in class %s\n", fn, c->classname);
     for (int i = 0; i < c->method_count; i++) {
         if (strcmp(c->methods[i].signature, fn) == 0) {
@@ -88,21 +89,20 @@ static inline void *(*virtual_method_lookup(primitive_class *c, const char *fn))
     if (c->super_primitive != NULL) {
         return virtual_method_lookup(c->super_primitive, fn);
     }
-    return (void *(*)(void *, ...))0;
+    return (virtual_method_fn)0;
 }
 
 #define super_primitive(instance)       (PrimitiveCast(primitive_class, instance)->super_primitive)
 #define primitive_classname(instance)   (PrimitiveCast(primitive_class, instance)->classname)
 #define SuperPrimitive(instance)        super_primitive(instance)
 
-#define virtual_call(returns, fn, instance, ...)        ((returns (*)(void *, ...)) virtual_method_lookup((primitive_class *)instance, #fn)) (instance, ## __VA_ARGS__)
-#define static_call(primitive_name, fn, instance, ...)  method_name(primitive_name, fn) ((primitive_name *)instance, ## __VA_ARGS__)
-#define super_virtual_call(returns, super_primitive_name, fn, instance, ...)    ((returns (*)(void *, ...)) virtual_method_lookup((primitive_class *)PrimitiveClassForPrimitive(super_primitive_name), #fn)) (instance, ## __VA_ARGS__)
-#define super_static_call(super_primitive_name, fn, instance, ...)              static_call(super_primitive_name, fn, instance, ## __VA_ARGS__)
+#define super_virtual_call(returns, ...)            ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup(this_class->super_primitive, this_method)) (this, this_class->super_primitive, this_method, ## __VA_ARGS__)
+#define virtual_call(returns, fn, instance, ...)        ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup((primitive_class *)instance, #fn)) (instance, instance, #fn, ## __VA_ARGS__)
+#define static_call(primitive_name, fn, instance, ...)  method_name(primitive_name, fn) ((primitive_name *)instance, (primitive_class *)instance, #fn, ## __VA_ARGS__)
 
-#define SuperCreate(super_primitive_name, p, ...)     super_virtual_call(primitive *, super_primitive_name, create, p, ## __VA_ARGS__)
-#define SuperCopy(super_primitive_name, p)            super_virtual_call(primitive *, super_primitive_name, copy, p)
-#define SuperDestroy(super_primitive_name, p)         super_virtual_call(void, super_primitive_name, destroy, p)
+#define SuperCreate(...)    super_virtual_call(primitive *, ## __VA_ARGS__)
+#define SuperCopy()         super_virtual_call(primitive *)
+#define SuperDestroy()      super_virtual_call(void)
 
 #define output *
 

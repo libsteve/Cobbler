@@ -15,9 +15,12 @@ primitive_define(custom, primitive, {
 custom *
 method(custom, create)
 {
-    this->words = create(list);
-    static_call(list, push, this->words, PSTRING("hello"));
-    static_call(list, push, this->words, PSTRING("goodbye"));
+    this = (custom *)SuperCreate();
+    if (this) {
+        this->words = create(list);
+        static_call(list, push, this->words, PSTRING("hello"));
+        static_call(list, push, this->words, PSTRING("goodbye"));
+    }
     return this;
 }
 
@@ -25,7 +28,7 @@ void
 method(custom, destroy)
 {
     disown(this->words);
-    SuperDestroy(primitive, this);
+    SuperDestroy();
 }
 
 void

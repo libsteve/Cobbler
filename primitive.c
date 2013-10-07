@@ -95,7 +95,8 @@ autodisown_pool *__autodisown_pool() {
     return tss_get(autodisown_pool_tss_id);
 }
 
-autodisown_pool *method(autodisown_pool, create) {
+autodisown_pool *
+method(autodisown_pool, create) {
     autodisown_pool *pool = this;
     if (pool) {
         static bool thread_specific_storage_is_initialized = false;
@@ -114,7 +115,8 @@ autodisown_pool *method(autodisown_pool, create) {
     return pool;
 }
 
-void method(autodisown_pool, destroy) {
+void
+method(autodisown_pool, destroy) {
     autodisown_pool *pool = this;
     if (pool) {
         if (pool->autodisowned_objects) {
@@ -128,7 +130,7 @@ void method(autodisown_pool, destroy) {
         __set_autodisown_pool(pool->previous_pool);
         disown(pool->previous_pool);
     }
-    SuperDestroy(primitive, pool);
+    SuperDestroy();
 }
 
 void *autodisown(void *v) {
