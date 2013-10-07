@@ -47,16 +47,13 @@ void *own(void *v) {
 
 void *disown(void *v) {
     primitive *p = v;
-    printf("attempt disown\n");
     if (p != NULL) {
         if (PrimitiveCast(primitive_class, p)->ownership_count == 0) {
             printf("cannot disown without ownership count\n");
             return p;
         }
-        printf("disowning\n");
         PrimitiveCast(primitive_class, p)->ownership_count -= 1;
         if (PrimitiveCast(primitive_class, p)->ownership_count == 0) {
-            printf("destroying\n");
             destroy(p);
             return NULL;
         }
@@ -131,7 +128,7 @@ void method(autodisown_pool, destroy) {
         __set_autodisown_pool(pool->previous_pool);
         disown(pool->previous_pool);
     }
-    SuperDestroy(pool);
+    SuperDestroy(primitive, pool);
 }
 
 void *autodisown(void *v) {

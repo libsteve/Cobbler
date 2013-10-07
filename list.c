@@ -10,7 +10,7 @@ void node_destroy(node *n) {
     } else if (n->prev) {
         n->prev->next = NULL;
     }
-    SuperDestroy(n);
+    SuperDestroy(primitive, n);
 }
 
 node *node_initialize(node *n, node *prev, primitive* value, node *next) {
@@ -49,7 +49,7 @@ void list_destroy(list *l) {
         disown(it);
         it = next;
     }
-    SuperDestroy(l);
+    SuperDestroy(primitive, l);
 }
 
 primitive *list_head(list *l) {

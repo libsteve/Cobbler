@@ -7,7 +7,7 @@ method(value, destroy) {
             free(this->bytes);
         if (this->type)
             disown(this->type);
-        SuperDestroy(this);
+        SuperDestroy(primitive, this);
     }
 }
 

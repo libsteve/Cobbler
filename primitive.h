@@ -79,10 +79,9 @@ struct virtual_method {
 #include <stdio.h>
 
 static inline void *(*virtual_method_lookup(primitive_class *c, const char *fn))(void *, ...) {
-    printf("searching for %s in class %s\n", fn, c->classname);
+    // printf("searching for %s in class %s\n", fn, c->classname);
     for (int i = 0; i < c->method_count; i++) {
         if (strcmp(c->methods[i].signature, fn) == 0) {
-            printf("found\n");
             return c->methods[i].functionpointer;
         }
     }
@@ -98,10 +97,12 @@ static inline void *(*virtual_method_lookup(primitive_class *c, const char *fn))
 
 #define virtual_call(returns, fn, instance, ...)        ((returns (*)(void *, ...)) virtual_method_lookup((primitive_class *)instance, #fn)) (instance, ## __VA_ARGS__)
 #define static_call(primitive_name, fn, instance, ...)  method_name(primitive_name, fn) ((primitive_name *)instance, ## __VA_ARGS__)
+#define super_virtual_call(returns, super_primitive_name, fn, instance, ...)    ((returns (*)(void *, ...)) virtual_method_lookup((primitive_class *)PrimitiveClassForPrimitive(super_primitive_name), #fn)) (instance, ## __VA_ARGS__)
+#define super_static_call(super_primitive_name, fn, instance, ...)              static_call(super_primitive_name, fn, instance, ## __VA_ARGS__)
 
-#define SuperCreate(p, ...)     virtual_call(primitive *, create, SuperPrimitive(p), ## __VA_ARGS__)
-#define SuperCopy(p)            virtual_call(primitive *, copy, SuperPrimitive(p))
-#define SuperDestroy(p)         virtual_call(void, destroy, SuperPrimitive(p))
+#define SuperCreate(super_primitive_name, p, ...)     super_virtual_call(primitive *, super_primitive_name, create, p, ## __VA_ARGS__)
+#define SuperCopy(super_primitive_name, p)            super_virtual_call(primitive *, super_primitive_name, copy, p)
+#define SuperDestroy(super_primitive_name, p)         super_virtual_call(void, super_primitive_name, destroy, p)
 
 #define output *
 

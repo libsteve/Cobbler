@@ -25,6 +25,7 @@ void
 method(custom, destroy)
 {
     disown(this->words);
+    SuperDestroy(primitive, this);
 }
 
 void
