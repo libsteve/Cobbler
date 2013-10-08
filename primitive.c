@@ -72,7 +72,20 @@ void *disown(void *v) {
 #define thrd_success 0
 #define tss_t pthread_key_t
 
-static tss_t autodisown_pool_tss_id;
+void autodisown_tss_dtor(void *v);
+
+static tss_t _autodisown_pool_tss_id;
+static tss_t autodisown_pool_tss_id() {
+    if (_autodisown_pool_tss_id) {
+        return _autodisown_pool_tss_id;
+    }
+    if (tss_create(&_autodisown_pool_tss_id, &autodisown_tss_dtor) == 0) {
+        return _autodisown_pool_tss_id;
+    }
+    fprintf(stderr, "%s\n", "Problem allocating thread specific storage for autodisown_pool");
+    exit(-1);
+    return 0;
+}
 
 void autodisown_tss_dtor(void *v) {
     autodisown_pool *p = v;
@@ -84,7 +97,7 @@ void autodisown_tss_dtor(void *v) {
 }
 
 void __set_autodisown_pool(autodisown_pool *pool) {
-    int result = tss_set(autodisown_pool_tss_id, pool);
+    int result = tss_set(autodisown_pool_tss_id(), pool);
     if (result != thrd_success) {
         fprintf(stderr, "%s\n", "Problem setting autodisown_pool to thread specific storage");
         exit(-1);
@@ -92,22 +105,13 @@ void __set_autodisown_pool(autodisown_pool *pool) {
 }
 
 autodisown_pool *__autodisown_pool() {
-    return tss_get(autodisown_pool_tss_id);
+    return tss_get(autodisown_pool_tss_id());
 }
 
 autodisown_pool *
 method(autodisown_pool, create) {
     autodisown_pool *pool = this;
     if (pool) {
-        static bool thread_specific_storage_is_initialized = false;
-        if (!thread_specific_storage_is_initialized) {
-            thread_specific_storage_is_initialized = true;
-            int result = tss_create(&autodisown_pool_tss_id, &autodisown_tss_dtor);
-            if (result != thrd_success) {
-                fprintf(stderr, "%s\n", "Problem allocating thread specific storage for autodisown_pool");
-                exit(-1);
-            }
-        }
         autodisown_pool *previous = __autodisown_pool();
         pool->previous_pool = own(previous);
         __set_autodisown_pool(pool);
@@ -134,14 +138,13 @@ method(autodisown_pool, destroy) {
 }
 
 void *autodisown(void *v) {
-    return v;
-    // TODO: fix the autodisown feature
     primitive *p = v;
     autodisown_pool *pool = __autodisown_pool();
-    printf("attempting autodisown\n");
+    printf("attempting autodisown with pool %p\n", pool);
     if (pool) {
         printf("autodisowning\n");
         int count = 0;
+        printf("autodisowned objects %p\n", pool->autodisowned_objects);
         for (; pool->autodisowned_objects[count] != NULL; count++) {
             primitive *autodisowned = pool->autodisowned_objects[count];
             if (autodisowned == p)
