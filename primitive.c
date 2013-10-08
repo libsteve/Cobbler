@@ -114,6 +114,7 @@ method(autodisown_pool, create) {
     if (pool) {
         autodisown_pool *previous = __autodisown_pool();
         pool->previous_pool = own(previous);
+        pool->autodisowned_objects = calloc(1, sizeof(primitive *));
         __set_autodisown_pool(pool);
     }
     return pool;
@@ -140,11 +141,8 @@ method(autodisown_pool, destroy) {
 void *autodisown(void *v) {
     primitive *p = v;
     autodisown_pool *pool = __autodisown_pool();
-    printf("attempting autodisown with pool %p\n", pool);
     if (pool) {
-        printf("autodisowning\n");
         int count = 0;
-        printf("autodisowned objects %p\n", pool->autodisowned_objects);
         for (; pool->autodisowned_objects[count] != NULL; count++) {
             primitive *autodisowned = pool->autodisowned_objects[count];
             if (autodisowned == p)
