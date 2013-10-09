@@ -21,12 +21,12 @@ typedef struct virtual_method  virtual_method;      // virtual_method
 typedef void *(*virtual_method_fn)(void *, void *, const char *, ...);  // virtual method function pointer
 
 struct primitive_class {
-    size_t      size;                          // how much size the primitive struct takes up
+    size_t      size;                           // how much size the primitive struct takes up
     const char  *primitive_type;                // a string name of the primitive structure
-    size_t      method_count;                  // a count of the amount of virtual methods
-    size_t      ownership_count;               // the current reference count
-    struct virtual_method   *methods;          // an array of the virtual methods for the primitive
-    struct primitive_class  *super_primitive;  // a pointer to the 'super class' of the primitive
+    size_t      method_count;                   // a count of the amount of virtual methods
+    size_t      ownership_count;                // the current reference count
+    struct virtual_method   *methods;           // an array of the virtual methods for the primitive
+    struct primitive_class  *super_primitive;   // a pointer to the 'super class' of the primitive
 };
 
 #define inherit_primitive(super_primitive) super_primitive primitive
@@ -52,12 +52,7 @@ struct virtual_method {
 #define using_custom_virtual(fn, fn_name)       (struct virtual_method){ .signature = #fn_name , .functionpointer = (virtual_method_fn)& fn }
 #define using_virtual(primitive_name, fn)       using_custom_virtual(method_name(primitive_name, fn), fn)
 
-#define primitive_declare(primitive_name)       struct primitive_name; typedef struct primitive_name primitive_name;
-#define primitive_define(primitive_name, super_primitive_name, structure, ...) \
-    typedef struct primitive_name { \
-        inherit_primitive(super_primitive_name); \
-        struct structure; \
-    } primitive_name; \
+#define primitive_class_inline_accessor(primitive_name, super_primitive_class, ...) \
     static inline primitive_class * PrimitiveClass(primitive_name) { \
         static bool setup = true; \
         static primitive_class c; \
@@ -69,10 +64,18 @@ struct virtual_method {
                 .primitive_type = PrimitiveName(primitive_name), \
                 .method_count = sizeof(methods) / sizeof(struct virtual_method), \
                 .methods = methods, \
-                .super_primitive = PrimitiveClass(super_primitive_name)}; \
+                .super_primitive = super_primitive_class}; \
         } \
         return &c; \
-    };
+    }
+
+#define primitive_declare(primitive_name)       struct primitive_name; typedef struct primitive_name primitive_name;
+#define primitive_define(primitive_name, super_primitive_name, structure, ...) \
+    typedef struct primitive_name { \
+        inherit_primitive(super_primitive_name); \
+        struct structure; \
+    } primitive_name; \
+    primitive_class_inline_accessor(primitive_name, PrimitiveClass(super_primitive_name), ## __VA_ARGS__)
 
 //////
 // interacting with primitive structures
@@ -80,7 +83,7 @@ struct virtual_method {
 #include <stdio.h>
 
 static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const char *fn) {
-    // printf("searching for %s in class %s\n", fn, c->primitive_type);
+    // printf("searching for %s in primitive %s\n", fn, c->primitive_type);
     for (int i = 0; i < c->method_count; i++) {
         if (strcmp(c->methods[i].signature, fn) == 0) {
             return c->methods[i].functionpointer;
@@ -126,28 +129,13 @@ extern void *own(void *);
 extern void *disown(void *);
 extern void *autodisown(void *);
 
-static inline primitive_class * PrimitiveClass(primitive) {
-    static bool setup = true;
-    static primitive_class c;
-    static virtual_method methods[] = {
-        using_virtual(primitive, create),
-        using_virtual(primitive, copy),
-        using_virtual(primitive, destroy),
-        using_custom_virtual(own, own),
-        using_custom_virtual(disown, disown),
-        using_custom_virtual(autodisown, autodisown)
-    };
-    if (setup) {
-        setup = false;
-        c = (primitive_class){
-            .size = sizeof(struct primitive),
-            .primitive_type = PrimitiveName(primitive),
-            .method_count = sizeof(methods) / sizeof(struct virtual_method),
-            .methods = methods,
-            .super_primitive = NULL};
-    }
-    return &c;
-}
+primitive_class_inline_accessor(primitive, NULL,
+    using_virtual(primitive, create),
+    using_virtual(primitive, copy),
+    using_virtual(primitive, destroy),
+    using_custom_virtual(own, own),
+    using_custom_virtual(disown, disown),
+    using_custom_virtual(autodisown, autodisown));
 
 //////
 // reference counting structures and implementations
