@@ -92,8 +92,13 @@ static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const 
     return (virtual_method_fn)0;
 }
 
-#define PrimitiveType(instance)     (PrimitiveCast(primitive_class, instance)->primitive_type)
-#define SuperPrimitive(instance)    (PrimitiveCast(primitive_class, instance)->super_primitive)
+static inline bool has_virtual_method(primitive_class *c, const char *fn) {
+    return !!(virtual_method_lookup(c, fn));
+}
+
+#define PrimitiveType(instance)             (PrimitiveCast(primitive_class, instance)->primitive_type)
+#define SuperPrimitive(instance)            (PrimitiveCast(primitive_class, instance)->super_primitive)
+#define PrimitiveHasVirtualMethod(i, fn)    has_virtual_method(PrimitiveCast(primitive_class, i), #fn)
 
 #define super_virtual_call(returns, ...)                ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup(this_class->super_primitive, this_method)) (this, this_class->super_primitive, this_method, ## __VA_ARGS__)
 #define virtual_call(returns, fn, instance, ...)        ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup((primitive_class *)instance, #fn)) (instance, instance, #fn, ## __VA_ARGS__)

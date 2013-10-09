@@ -1,46 +1,15 @@
 #include "Cobbler/list.h"
 
-void 
-method(node, destroy) {
-    disown(this->value);
-    if (this->next && this->prev) {
-        this->next->prev = this->prev;
-        this->prev->next = this->next;
-    } else if (this->next) {
-        this->next->prev = NULL;
-    } else if (this->prev) {
-        this->prev->next = NULL;
-    }
-    SuperDestroy();
-}
-
-node *
-method(node, initialize, node *prev, primitive *value, node *next) {
-    if (this) {
-        this->prev = prev;
-        this->value = own(value);
-        this->next = next;
-        if (prev) prev->next = this;
-        if (next) next->prev = this;
-    }
-    return this;
-}
-
-primitive *node_value(node *n) {
-    if (n) {
-        return n->value;
-    }
-    return NULL;
-}
-
+// primitive methods
 list *
-method(list, create) {
-    static_call(node, initialize, this, (node *)this, NULL, (node *)this);
-    return this;
+method(list, create)
+{
+    return SuperCreate(this, NULL, this);
 }
 
 void 
-method(list, destroy) {
+method(list, destroy)
+{
     node *it = ((node *)this)->next;
     while (it != (node *)this) {
         node *next = it->next;
@@ -50,20 +19,40 @@ method(list, destroy) {
     SuperDestroy();
 }
 
+// iterator interface override methods
+iterator *
+method(list, iter_get)
+{
+    if (PrimitiveCast(node, this)->next != this) {
+        return PrimitiveCast(node, this)->next;
+    }
+    return NULL;
+}
+
+bool
+method(list, iter_isValid)
+{
+    return false;
+}
+
+// list methods
 primitive *
-method(list, head) {
+method(list, head)
+{
     primitive *p = ((node *)this)->next->value;
     return autodisown(own(p));
 }
 
 primitive *
-method(list, tail) {
+method(list, tail)
+{
     primitive *p = ((node *)this)->prev->value;
     return autodisown(own(p));
 }
 
 list *
-method(list, push, primitive *p) {
+method(list, push, primitive *p)
+{
     node *n = create(node);
     n = static_call(node, initialize, n, ((node *)this)->prev, p, (node *)this);
     if (n) this->length += 1;
@@ -71,7 +60,8 @@ method(list, push, primitive *p) {
 }
 
 list *
-method(list, rpush, primitive *p) {
+method(list, rpush, primitive *p)
+{
     node *n = create(node);
     n = static_call(node, initialize, n, (node *)this, p, ((node *)this)->next);
     if (n) this->length += 1;
@@ -79,7 +69,8 @@ method(list, rpush, primitive *p) {
 }
 
 primitive *
-method(list, peek) {
+method(list, peek)
+{
     if (this->length > 0) {
         primitive *p = ((node *)this)->prev->value;
         return autodisown(own(p));
@@ -88,7 +79,8 @@ method(list, peek) {
 }
 
 primitive *
-method(list, rpeek) {
+method(list, rpeek)
+{
     if (this->length > 0) {
         primitive *p = ((node *)this)->next->value;
         return autodisown(own(p));
@@ -97,7 +89,8 @@ method(list, rpeek) {
 }
 
 list *
-method(list, pop, primitive *output p) {
+method(list, pop, primitive *output p)
+{
     primitive *value = NULL;
     if (this->length > 0) {
         node *prev = ((node *)this)->prev;
@@ -115,7 +108,8 @@ method(list, pop, primitive *output p) {
 }
 
 list *
-method(list, rpop, primitive *output p) {
+method(list, rpop, primitive *output p)
+{
     primitive *value = NULL;
     if (this->length > 0) {
         node *next = ((node *)this)->next;
