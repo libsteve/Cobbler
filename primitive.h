@@ -22,7 +22,7 @@ typedef void *(*virtual_method_fn)(void *, void *, const char *, ...);  // virtu
 
 struct primitive_class {
     size_t      size;                          // how much size the primitive struct takes up
-    const char  *classname;                    // a string name of the primitive structure
+    const char  *primitivename;                // a string name of the primitive structure
     size_t      method_count;                  // a count of the amount of virtual methods
     size_t      ownership_count;               // the current reference count
     struct virtual_method   *methods;          // an array of the virtual methods for the primitive
@@ -36,15 +36,15 @@ struct primitive {
 
 struct virtual_method {
     const char        *signature;       // a string representation for the method
-    virtual_method_fn functionpointer; // a function pointer to the method implemenation
+    virtual_method_fn functionpointer;  // a function pointer to the method implemenation
 };
 
 //////
 // defining custom primitive structures
 
-#define PrimitiveClassForPrimitive(p)           p ## _PrimitiveClass ()
+#define PrimitiveClass(p)                       p ## _PrimitiveClass ()
 #define PrimitiveCast(new_primitive, instance)  ((new_primitive *)instance)
-#define PrimitiveClassName(p)                   #p
+#define PrimitiveName(p)                        #p
 
 #define method_name(primitive_name, fn)         primitive_name ## _ ## fn
 #define method(primitive_name, fn, ...)         method_name(primitive_name, fn) (primitive_name *this , primitive_class *this_class , const char *this_method , ## __VA_ARGS__)
@@ -58,7 +58,7 @@ struct virtual_method {
         inherit_primitive(super_primitive_name); \
         struct structure; \
     } primitive_name; \
-    static inline primitive_class * PrimitiveClassForPrimitive(primitive_name) { \
+    static inline primitive_class * PrimitiveClass(primitive_name) { \
         static bool setup = true; \
         static primitive_class c; \
         static virtual_method methods[] = { __VA_ARGS__ }; \
@@ -66,10 +66,10 @@ struct virtual_method {
             setup = false; \
             c = (struct primitive_class){ \
                 .size = sizeof(struct primitive_name), \
-                .classname = PrimitiveClassName(primitive_name), \
+                .primitivename = PrimitiveName(primitive_name), \
                 .method_count = sizeof(methods) / sizeof(struct virtual_method), \
                 .methods = methods, \
-                .super_primitive = PrimitiveClassForPrimitive(super_primitive_name)}; \
+                .super_primitive = PrimitiveClass(super_primitive_name)}; \
         } \
         return &c; \
     };
@@ -80,7 +80,7 @@ struct virtual_method {
 #include <stdio.h>
 
 static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const char *fn) {
-    // printf("searching for %s in class %s\n", fn, c->classname);
+    // printf("searching for %s in class %s\n", fn, c->primitivename);
     for (int i = 0; i < c->method_count; i++) {
         if (strcmp(c->methods[i].signature, fn) == 0) {
             return c->methods[i].functionpointer;
@@ -93,7 +93,7 @@ static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const 
 }
 
 #define super_primitive(instance)       (PrimitiveCast(primitive_class, instance)->super_primitive)
-#define primitive_classname(instance)   (PrimitiveCast(primitive_class, instance)->classname)
+#define primitive_classname(instance)   (PrimitiveCast(primitive_class, instance)->primitivename)
 #define SuperPrimitive(instance)        super_primitive(instance)
 
 #define super_virtual_call(returns, ...)            ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup(this_class->super_primitive, this_method)) (this, this_class->super_primitive, this_method, ## __VA_ARGS__)
@@ -110,7 +110,7 @@ static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const 
 // creating primitive structure instances
 
 extern primitive *__create_instance(primitive_class *c);
-#define create(primitive_name, ...) virtual_call(primitive_name *, create, __create_instance(PrimitiveClassForPrimitive(primitive_name)), ## __VA_ARGS__)
+#define create(primitive_name, ...) virtual_call(primitive_name *, create, __create_instance(PrimitiveClass(primitive_name)), ## __VA_ARGS__)
 extern void *copy(void *);
 extern void destroy(void *);
 
@@ -125,7 +125,7 @@ extern void *own(void *);
 extern void *disown(void *);
 extern void *autodisown(void *);
 
-static inline primitive_class * PrimitiveClassForPrimitive(primitive) {
+static inline primitive_class * PrimitiveClass(primitive) {
     static bool setup = true;
     static primitive_class c;
     static virtual_method methods[] = {
@@ -140,7 +140,7 @@ static inline primitive_class * PrimitiveClassForPrimitive(primitive) {
         setup = false;
         c = (primitive_class){
             .size = sizeof(struct primitive),
-            .classname = PrimitiveClassName(primitive),
+            .primitivename = PrimitiveName(primitive),
             .method_count = sizeof(methods) / sizeof(struct virtual_method),
             .methods = methods,
             .super_primitive = NULL};
