@@ -1,6 +1,4 @@
-#include "primitive.h"
-#include "string.h"
-#include "list.h"
+#include "Cobbler.h"
 #include <stdio.h>
 
 primitive_declare(custom);

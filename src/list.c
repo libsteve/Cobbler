@@ -1,4 +1,4 @@
-#include "list.h"
+#include "Cobbler/list.h"
 
 void 
 method(node, destroy) {

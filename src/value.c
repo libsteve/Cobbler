@@ -1,4 +1,4 @@
-#include "value.h"
+#include "Cobbler/value.h"
 
 void
 method(value, destroy) {
