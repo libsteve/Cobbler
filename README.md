@@ -42,8 +42,8 @@ Pass in the name of the primitive, the super primitive, a structure to represent
 			int a_number;
 			char a_char;
 		},
-		using_virtual(my_primitive, create),
-		using_virtual(my_primitive, destroy));
+		virtual(my_primitive, create),
+		virtual(my_primitive, destroy));
 
 You can forward-declare the primitive using the `primitive_declare()` macro.
 This can be useful when using the `method()` macro for declaring virtual methods for the primitive before you define the primitive itself.
@@ -58,9 +58,9 @@ This can be useful when using the `method()` macro for declaring virtual methods
 			int a_number;
 			char a_char;
 		},
-		using_virtual(my_primitive, create),
-		using_virtual(my_primitive, destroy),
-		using_virtual(my_primitive, getNumber));
+		virtual(my_primitive, create),
+		virtual(my_primitive, destroy),
+		virtual(my_primitive, getNumber));
 
 The `method()` macro can be used for defining non-virtual methods too.
 
