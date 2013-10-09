@@ -22,6 +22,6 @@ primitive_define(string, primitive, {
     using_virtual(string, destroy),
     using_virtual(string, copy));
 
-#define PSTRING(__string) autodisown(create(string, __string))
+#define pstring(__string)   autocreate(string, __string)
 
 #endif

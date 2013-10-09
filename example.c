@@ -18,8 +18,8 @@ method(custom, create)
     this = (custom *)SuperCreate();
     if (this) {
         this->words = create(list);
-        static_call(list, push, this->words, PSTRING("hello"));
-        static_call(list, push, this->words, PSTRING("goodbye"));
+        static_call(list, push, this->words, pstring("hello"));
+        static_call(list, push, this->words, pstring("goodbye"));
     }
     return this;
 }
