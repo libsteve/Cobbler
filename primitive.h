@@ -151,6 +151,10 @@ static inline primitive_class * PrimitiveClass(primitive) {
 //////
 // reference counting structures and implementations
 
+#define context for(autodisown_pool *__p__ = create(autodisown_pool), \
+                    *__i__ = (void *)1; __i__ != NULL; \
+                    __i__ = NULL, __p__ = disown(__p__))
+
 primitive_declare(autodisown_pool);
 
 extern autodisown_pool *method(autodisown_pool, create);
