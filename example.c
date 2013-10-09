@@ -10,7 +10,7 @@ void    method(custom, destroy);
 
 primitive_define(custom, primitive, {
     list *words;
-}, using_virtual(custom, create), using_virtual(custom, destroy));
+}, virtual(custom, create), virtual(custom, destroy));
 
 custom *
 method(custom, create)

@@ -18,9 +18,9 @@ primitive_define(string, primitive, {
         char *str;
         size_t length;
     },
-    using_virtual(string, create),
-    using_virtual(string, destroy),
-    using_virtual(string, copy));
+    virtual(string, create),
+    virtual(string, destroy),
+    virtual(string, copy));
 
 #define pstring(__string)   autocreate(string, __string)
 

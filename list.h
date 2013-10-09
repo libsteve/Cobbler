@@ -15,7 +15,7 @@ primitive_define(node, primitive, {
         struct node *prev;
         struct primitive *value;
     },
-    using_virtual(node, destroy));
+    virtual(node, destroy));
 
 extern node *method(node, initialize, node *prev, primitive *value, node *next);
 
@@ -30,8 +30,8 @@ extern void    method(list, destroy);
 primitive_define(list, node, {
         size_t length;
     },
-    using_virtual(list, create),
-    using_virtual(list, destroy));
+    virtual(list, create),
+    virtual(list, destroy));
 
 extern primitive *method(list, head);
 extern primitive *method(list, tail);

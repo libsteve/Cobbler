@@ -44,16 +44,16 @@ struct virtual_method {
 
 #define PrimitiveClass(p)                       p ## _PrimitiveClass ()
 #define PrimitiveCast(new_primitive, instance)  ((new_primitive *)instance)
-#define PrimitiveName(p)                       #p
+#define PrimitiveName(p)                        #p
 
 #define method_name(primitive_name, fn)         primitive_name ## _ ## fn
 #define method(primitive_name, fn, ...)         method_name(primitive_name, fn) (primitive_name *this , primitive_class *this_class , const char *this_method , ## __VA_ARGS__)
 
-#define using_custom_virtual(fn, fn_name)       (struct virtual_method){ .signature = #fn_name , .functionpointer = (virtual_method_fn)& fn }
-#define using_virtual(primitive_name, fn)       using_custom_virtual(method_name(primitive_name, fn), fn)
+#define custom_virtual(fn, fn_name)             (struct virtual_method){ .signature = #fn_name , .functionpointer = (virtual_method_fn)& fn }
+#define virtual(primitive_name, fn)             custom_virtual(method_name(primitive_name, fn), fn)
 
 #define primitive_class_inline_accessor(primitive_name, super_primitive_class, ...) \
-    static inline primitive_class * PrimitiveClass(primitive_name) { \
+    static inline struct primitive_class * PrimitiveClass(primitive_name) { \
         static bool setup = true; \
         static primitive_class c; \
         static virtual_method methods[] = { __VA_ARGS__ }; \
@@ -80,10 +80,7 @@ struct virtual_method {
 //////
 // interacting with primitive structures
 
-#include <stdio.h>
-
 static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const char *fn) {
-    // printf("searching for %s in primitive %s\n", fn, c->primitive_type);
     for (int i = 0; i < c->method_count; i++) {
         if (strcmp(c->methods[i].signature, fn) == 0) {
             return c->methods[i].functionpointer;
@@ -130,12 +127,12 @@ extern void *disown(void *);
 extern void *autodisown(void *);
 
 primitive_class_inline_accessor(primitive, NULL,
-    using_virtual(primitive, create),
-    using_virtual(primitive, copy),
-    using_virtual(primitive, destroy),
-    using_custom_virtual(own, own),
-    using_custom_virtual(disown, disown),
-    using_custom_virtual(autodisown, autodisown));
+    virtual(primitive, create),
+    virtual(primitive, copy),
+    virtual(primitive, destroy),
+    custom_virtual(own, own),
+    custom_virtual(disown, disown),
+    custom_virtual(autodisown, autodisown));
 
 //////
 // reference counting structures and implementations
@@ -153,7 +150,7 @@ primitive_define(autodisown_pool, primitive, {
         struct autodisown_pool *previous_pool;
         struct primitive **autodisowned_objects;
     },
-    using_virtual(autodisown_pool, create), 
-    using_virtual(autodisown_pool, destroy));
+    virtual(autodisown_pool, create), 
+    virtual(autodisown_pool, destroy));
 
 #endif
