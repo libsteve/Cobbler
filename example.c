@@ -44,7 +44,7 @@ method(custom, print)
 int main()
 {
     context {
-        custom *c = autodisown(create(custom));
+        custom *c = auto(custom);
         static_call(custom, print, c);
     }
     return 0;

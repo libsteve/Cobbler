@@ -96,7 +96,7 @@ static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const 
 #define primitive_classname(instance)   (PrimitiveCast(primitive_class, instance)->primitivename)
 #define SuperPrimitive(instance)        super_primitive(instance)
 
-#define super_virtual_call(returns, ...)            ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup(this_class->super_primitive, this_method)) (this, this_class->super_primitive, this_method, ## __VA_ARGS__)
+#define super_virtual_call(returns, ...)                ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup(this_class->super_primitive, this_method)) (this, this_class->super_primitive, this_method, ## __VA_ARGS__)
 #define virtual_call(returns, fn, instance, ...)        ((returns (*)(void *, void *, const char *, ...)) virtual_method_lookup((primitive_class *)instance, #fn)) (instance, instance, #fn, ## __VA_ARGS__)
 #define static_call(primitive_name, fn, instance, ...)  method_name(primitive_name, fn) ((primitive_name *)instance, (primitive_class *)instance, #fn, ## __VA_ARGS__)
 
@@ -110,7 +110,9 @@ static inline virtual_method_fn virtual_method_lookup(primitive_class *c, const 
 // creating primitive structure instances
 
 extern primitive *__create_instance(primitive_class *c);
-#define create(primitive_name, ...) virtual_call(primitive_name *, create, __create_instance(PrimitiveClass(primitive_name)), ## __VA_ARGS__)
+#define create(primitive_name, ...)     virtual_call(primitive_name *, create, __create_instance(PrimitiveClass(primitive_name)), ## __VA_ARGS__)
+#define autocreate(primitive_name, ...) autodisown(create(primitive_name, ## __VA_ARGS__))
+#define auto(primitive_name, ...)        autocreate(primitive_name, ## __VA_ARGS__)
 extern void *copy(void *);
 extern void destroy(void *);
 
