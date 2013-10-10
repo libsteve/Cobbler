@@ -8,21 +8,21 @@
 
 typedef primitive iterator;
 
-extern iterator     *iter_get(iterator *);
-extern iterator     *iter_next(iterator *);
-extern iterator     *iter_prev(iterator *);
-extern primitive    *iter_value(iterator *);
-extern iterator     *iter_delete(iterator *);
-extern bool          iter_hasNext(iterator *);
-extern bool          iter_hasPrev(iterator *);
-extern bool          iter_isValid(iterator *);
+extern iterator     *iter_get(void *);
+extern iterator     *iter_next(void *);
+extern iterator     *iter_prev(void *);
+extern primitive    *iter_value(void *);
+extern iterator     *iter_delete(void *);
+extern bool          iter_hasNext(void *);
+extern bool          iter_hasPrev(void *);
+extern bool          iter_isValid(void *);
 
 #define VALUE(it)   iter_value(it)
 
 #define foreach(it, iterable) \
-    for (iterator *it = iter_get(iterable) *__##it = it; \
+    for (iterator *it = iter_get(iterable); \
          it && iter_hasNext(it) && iter_isValid(it); \
-         __##it == it ? it = iter_next(it) : __##it = it)
+         it = iter_next(it))
 
 #define in ,
 #define forin(value, iterable) \
@@ -71,7 +71,7 @@ primitive_define(node, primitive, {
     virtual(node, iter_get),
     virtual(node, iter_next),
     virtual(node, iter_prev),
-    virtual(node, iter_remove),
+    virtual(node, iter_delete),
     virtual(node, iter_value),
     virtual(node, iter_hasNext),
     virtual(node, iter_hasPrev),

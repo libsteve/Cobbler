@@ -4,50 +4,50 @@
 //////
 // iterator interface functions
 
-iterator *iter_get(iterator *it)
+iterator *iter_get(void *it)
 {
 	return virtual_call(iterator *, iter_get, it);
 }
 
-iterator *iter_next(iterator *it)
+iterator *iter_next(void *it)
 {
 	return iter_get(virtual_call(iterator *, iter_next, it));
 }
 
-iterator *iter_prev(iterator *it)
+iterator *iter_prev(void *it)
 {
 	if (PrimitiveHasVirtualMethod(it, iter_prev))
-		return iter_get(virtual_call(iterator *, iter_prev, it));
+		return iter_get(virtual_call(void *, iter_prev, it));
 	return NULL;
 }
 
-primitive *iter_value(iterator *it)
+primitive *iter_value(void *it)
 {
 	return virtual_call(primitive *, iter_value, it);
 }
 
-iterator *iter_delete(iterator *it)
+iterator *iter_delete(void *it)
 {
 	if (PrimitiveHasVirtualMethod(it, iter_delete))
 		return virtual_call(iterator *, iter_delete, it);
 	return NULL;
 }
 
-bool iter_hasNext(iterator *it)
+bool iter_hasNext(void *it)
 {
 	return virtual_call(bool, iter_hasNext, it);
 }
 
-bool iter_hasPrev(iterator *it)
+bool iter_hasPrev(void *it)
 {
 	if (PrimitiveHasVirtualMethod(it, iter_hasPrev))
 		return virtual_call(bool, iter_hasPrev, it);
 	return NULL;
 }
 
-bool iter_isNext(iterator *it)
+bool iter_isValid(void *it)
 {
-	return virtual_call(bool, iter_isNext, it);
+	return virtual_call(bool, iter_isValid, it);
 }
 
 //////
@@ -59,6 +59,8 @@ method(node, create, node *prev, primitive *value, node *next)
 {
 	this->prev = prev;
 	this->next = next;
+	if (prev) prev->next = this;
+	if (next) next->prev = this;
 	this->value = own(value);
 	return this;
 }
@@ -74,7 +76,7 @@ method(node, destroy)
 
 // iterator methods
 node *
-method(ndoe, iter_get)
+method(node, iter_get)
 {
 	return this;
 }
@@ -102,9 +104,9 @@ method(node, iter_delete)
 		static_call(node, iter_hasPrev, this)) {
 		this->next->prev = this->prev;
 		this->prev->next = this->next;
-		node *next = this->next;
+		node *prev = this->prev;
 		disown(this);
-		return next;
+		return prev;
 	} else if (static_call(node, iter_hasNext, this)) {
 		this->next->prev = NULL;
 		node *next = this->next;
@@ -129,17 +131,17 @@ method(node, iter_value)
 bool 
 method(node, iter_hasNext)
 {
-	return !!(this->next);
+	return this->next && iter_isValid(this->next);
 }
 
 bool 
 method(node, iter_hasPrev)
 {
-	return !!(this->prev);
+	return this->prev && iter_isValid(this->prev);
 }
 
 bool
-method(node, iter_isNext)
+method(node, iter_isValid)
 {
 	return true;
 }
@@ -155,7 +157,7 @@ method(node, value)
 void
 method(node, setValue, primitive *value)
 {
-	if (node->value) {
+	if (this->value) {
 		disown(this->value);
 	}
 	this->value = own(value);
