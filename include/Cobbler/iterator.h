@@ -21,13 +21,13 @@ extern bool          iter_isValid(void *);
 #define VALUE(it)   iter_value(it)
 
 #define foreach(it, iterable) \
-    for (iterator *it = iter_get(iterable); it && iter_hasNext(it); it = iter_next(it))
+    for (iterator *it = iter_get(iterable); it; it = iter_hasNext(it) ? iter_next(it) : NULL)
 
 #define in ,
 #define forin(value, iterable) \
     for (primitive *it = iter_get(iterable), *value = iter_value(it); \
-         it && iter_hasNext(it); \
-         it = iter_next(it), value = iter_value(it))
+         it; \
+         it = iter_hasNext(it) ? iter_next(it) : NULL, value = iter_value(it))
 
 //////
 // Node Primitive

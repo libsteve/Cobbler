@@ -32,7 +32,7 @@ method(custom, destroy)
 void
 method(custom, print)
 {
-    LIST_FOREACH(it, this->words)
+    foreach(it, this->words)
     {
         const char *c = static_call(string, c_string, VALUE(it));
         printf("%s\n", c);
