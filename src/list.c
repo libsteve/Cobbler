@@ -63,7 +63,7 @@ method(list, tail)
 list *
 method(list, push, primitive *p)
 {
-    node *n = create(node, PrimitiveCast(node, this)->prev, p, PrimitiveCast(node, this));
+    create(node, PrimitiveCast(node, this)->prev, p, PrimitiveCast(node, this));
     this->length += 1;
     return this;
 }
@@ -71,7 +71,7 @@ method(list, push, primitive *p)
 list *
 method(list, rpush, primitive *p)
 {
-    node *n = create(node, this, p, PrimitiveCast(node, this)->next);
+    create(node, this, p, PrimitiveCast(node, this)->next);
     this->length += 1;
     return this;
 }
