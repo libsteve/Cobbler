@@ -9,6 +9,7 @@
 typedef primitive iterator;
 
 extern iterator     *iter_get(void *);
+extern iterator     *iter_rget(void *);
 extern iterator     *iter_next(void *);
 extern iterator     *iter_prev(void *);
 extern primitive    *iter_value(void *);
@@ -20,9 +21,7 @@ extern bool          iter_isValid(void *);
 #define VALUE(it)   iter_value(it)
 
 #define foreach(it, iterable) \
-    for (iterator *it = iter_get(iterable); \
-         it && iter_hasNext(it) && iter_isValid(it); \
-         it = iter_next(it))
+    for (iterator *it = iter_get(iterable); it && iter_hasNext(it); it = iter_next(it))
 
 #define in ,
 #define forin(value, iterable) \
@@ -40,6 +39,7 @@ extern void          method(node, destroy);
 
 // iterator methods
 extern node         *method(node, iter_get);
+extern node         *method(node, iter_rget);
 extern node         *method(node, iter_next);
 extern node         *method(node, iter_prev);
 extern node         *method(node, iter_delete);
@@ -69,6 +69,7 @@ primitive_define(node, primitive, {
 
     // iterator methods
     virtual(node, iter_get),
+    virtual(node, iter_rget),
     virtual(node, iter_next),
     virtual(node, iter_prev),
     virtual(node, iter_delete),

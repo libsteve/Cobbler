@@ -15,7 +15,8 @@ extern void       method(list, destroy);
 
 // iterator interface override methods
 extern iterator  *method(list, iter_get);
-extern iterator  *method(list, iter_isValid);
+extern iterator  *method(list, iter_rget);
+extern bool       method(list, iter_isValid);
 
 // list methods
 extern primitive *method(list, head);
@@ -39,7 +40,8 @@ primitive_define(list, node, {
 
     // iterator interface override methods
     virtual(list, iter_get),
-    virtual(list, iter_isNext),
+    virtual(list, iter_rget),
+    virtual(list, iter_isValid),
 
     // list methods
     virtual(list, head),

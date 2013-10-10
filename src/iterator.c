@@ -9,6 +9,11 @@ iterator *iter_get(void *it)
 	return virtual_call(iterator *, iter_get, it);
 }
 
+iterator *iter_rget(void *it)
+{
+	return virtual_call(iterator *, iter_rget, it);
+}
+
 iterator *iter_next(void *it)
 {
 	return iter_get(virtual_call(iterator *, iter_next, it));
@@ -79,6 +84,12 @@ node *
 method(node, iter_get)
 {
 	return this;
+}
+
+node 
+*method(node, iter_rget)
+{
+	return static_call(node, iter_get, this);
 }
 
 node *
