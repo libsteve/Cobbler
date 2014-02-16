@@ -16,7 +16,7 @@ examples_X		= $(examples:.c=)
 ###
 # Compiler Flags
 
-CFLAGS = -I ./include -std=c11 -Wall -Werror
+CFLAGS = -I ./include -std=gnu11 -Wall -Werror
 LFLAGS = 
 
 LIBS = -lpthread
