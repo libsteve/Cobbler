@@ -1,9 +1,10 @@
-Cobbler: A C Object System
+Cobbler: A Primitive C Object System
 =======
 
 Cobbler is an attempt to add objects to the C language in order to better understand the implementations of dynamic object systems such as that of Smalltalk and Objective-C.
 
-Class definitions, known as `primitives`, are created using C Macros to describe the properties and behavior of objects. Memory management of instances is done with reference counting, using `own` and `disown`, and are capable of being assigned to a thread-specific pool of objects to automatically release at the end of some scope with `autodisown`.
+Objects, known as `primitives`, are created using C Macros to define their properties and behavior.
+Memory management is handled through reference counting, using the `own` and `disown` functions. With `autodiswon`, primitives can be assigned to a thread-specific pool of objects to automatically release at the end of some scope.
 
 ## Basic Usage
 
